@@ -43,7 +43,7 @@ const AddTask = (props) => {
   const [isButtonDiabled, setButtonDisabled] = useState(true);
   const [ReviwerDisplayName, setReviwerDisplayName] = useState("");
   const [ReviewerEmail, setReviewerEmail] = useState();
-  const [addTaskLoad, setAddTaskLoad] = useState(false);
+  const [addTaskLoad, setAddTaskLoad] = useState(false)
   const [ReviewerUserId, setReviewerId] = useState("")
 
   const styles = useStyles();
