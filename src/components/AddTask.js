@@ -29,7 +29,7 @@ const useStyles = makeStyles({
   content: {
     display: "flex",
     flexDirection: "column",
-    rowGap: "11px",
+    rowGap: "10px",
   },
 });
 const AddTask = (props) => {
@@ -44,7 +44,7 @@ const AddTask = (props) => {
   const [ReviwerDisplayName, setReviwerDisplayName] = useState("");
   const [ReviewerEmail, setReviewerEmail] = useState();
   const [addTaskLoad, setAddTaskLoad] = useState(false);
-  const [ReviewerUserId, setReviewerId] = useState("");
+  const [ReviewerUserId, setReviewerId] = useState("")
 
   const styles = useStyles();
 
