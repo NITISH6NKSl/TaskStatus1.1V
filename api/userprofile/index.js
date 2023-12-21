@@ -78,7 +78,7 @@ module.exports = async function (context, req, teamsfxContext) {
   // Query user's information from the access token.
   try {
     const currentUser = await credential.getUserInfo();
-    if (currentUser) {
+    if (currentUser && currentUser.displayName) {
       res.body.userInfoMessage = `User display name is ${currentUser.displayName}.`;
     } else {
       res.body.userInfoMessage =
@@ -114,13 +114,13 @@ module.exports = async function (context, req, teamsfxContext) {
       .get();
       
     res.body.graphClientMessage = profile;
-    const profilePic = await graphClient
-      .api(
-        "/me//photos/48x48/$value"
-      )
-      .get(); 
-      console.log("This is a profile picture>>>>>>>>>>>>>>>>>",profilePic)
-    res.body.profilePicture = profilePic;
+    // const profilePic = await graphClient
+    //   .api(
+    //     "/me//photos/48x48/$value"
+    //   )
+    //   .get(); 
+    //   console.log("This is a profile picture>>>>>>>>>>>>>>>>>",profilePic)
+    // res.body.profilePicture = profilePic;
 
 
   } catch (e) {
