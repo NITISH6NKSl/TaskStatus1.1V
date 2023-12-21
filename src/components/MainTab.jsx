@@ -169,7 +169,7 @@ const settingSlider = {
           };
           console.log("This is a main begore obj", obj);
           const res = await GetSite(teamsUserCredential, obj);
-          console.log("This is response from backend ", res);
+          console.log("This is response from backend ???????? for site id ", res);
           const graphSiteid = res?.graphClientMessage;
           const graphListToDoId = res?.listIdToDo;
           const graphListToTaskEntryId = res?.listIdToDoEntry;
@@ -194,6 +194,7 @@ const settingSlider = {
             setNeedConsent(false);
           }
           if (graphSiteid && graphListToDoId && graphListToTaskEntryId) {
+            console.log("This is in check")
             try {
               const obj = {
                 siteId: graphSiteid,

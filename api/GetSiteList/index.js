@@ -106,14 +106,14 @@ module.exports = async function (context, req, teamsfxContext) {
     const graphClient = Client.initWithMiddleware({
       authProvider: authProvider,
     });
-    // console.log(
-    //   "This is a context in backend of ????????????????",
-    //   `/sites/${context.req.body.tanentUrl}:?$search="Teams_Site"&$select=sharepointIds`
-    // );
+    console.log(
+      "This is a context in backend of ????????????????",
+      `/sites/${context.req.body.tanentUrl}:?$search="Teams_Site"&$select=sharepointIds`
+    );
 
-    // // console.log("Login the body for list id", context.bindings.req.body);
-    // const listId1 = context.req.body.listid1;
-    // const listId2 = context.req.body.listid2;
+    // console.log("Login the body for list id", context.bindings.req.body);
+    const listId1 = context.req.body.listid1;
+    const listId2 = context.req.body.listid2;
     try{
     // console.log("This is to check json is comming???????", NewList[0].listSub);
     // console.log("This is site name the body", context.req.body.siteName);
