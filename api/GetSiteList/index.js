@@ -124,7 +124,7 @@ module.exports = async function (context, req, teamsfxContext) {
     //   res.body.data.graphClientMessage.value[0]?.sharepointIds.siteId;
     console.log("This is a api respone----->????>>???>?", profile);
     const siteId = profile.id.split(",");
-    res.body.graphClientMessage = siteId[1];
+    res.body.graphClientMessage =siteId[1];
     console.log("This is data of site id?????????", siteId[1]);
     if (profile.id) {
       const listIdMain = await graphClient

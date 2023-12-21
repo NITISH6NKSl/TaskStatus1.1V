@@ -165,7 +165,7 @@ const settingSlider = {
             siteName: "Teams_Site",
             listTodo: "ToDoTask",
             listTaskEntry: "To Do Task Entry",
-            tanentUrl,
+            tanentUrl:context.sharePointSite.teamSiteDomain,
           };
           console.log("This is a main begore obj", obj);
           const res = await GetSite(teamsUserCredential, obj);
