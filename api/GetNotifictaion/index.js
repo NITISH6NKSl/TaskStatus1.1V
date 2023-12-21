@@ -108,10 +108,10 @@ module.exports = async function (context, req, teamsfxContext) {
     const graphClient = Client.initWithMiddleware({
       authProvider: authProvider,
     });
-    // console.log(
-    //   "Checking in GetNottification-----------",
-    //   context.bindings.req.body
-    // );
+    context.log(
+      "Checking in GetNottification-----------",
+      context.bindings.req.body
+    );
     const userId =req.body.reviewerUserId;
     const client = await graphClient
       .api(`/users/${userId}/teamwork/sendActivityNotification`)

@@ -120,17 +120,17 @@ const settingSlider = {
     slidesToShow: 1,
     slidesToScroll: 1
   };
-//   useEffect( () => {
-//     if(teamsUserCredential){
-//       getProfileIN(teamsUserCredential)
-//     }
+  useEffect( () => {
+    if(teamsUserCredential){
+      getProfileIN(teamsUserCredential)
+    }
    
-//   }, [teamsUserCredential])
-//   const getProfileIN=async(teamsUserCredential)=>{
-//     const tempPresence= await getprofile(teamsUserCredential)
-//     console.log("This is a profile presence---",tempPresence)
-//     setPresence(tempPresence?.graphClientMessage?.availability)
-//  } 
+  }, [teamsUserCredential])
+  const getProfileIN=async(teamsUserCredential)=>{
+    const tempPresence= await getprofile(teamsUserCredential)
+    console.log("This is a profile presence---",tempPresence)
+    setPresence(tempPresence?.graphClientMessage?.availability)
+ } 
 
   // console.log(
   //   "This is a id of site list",

@@ -155,8 +155,8 @@ const AddTask = (props) => {
     //   EstimatedHours
     // );
     await addTasklist(teamsUserCredential, obj);
-    props?.setCallReload(true);
     await Notifiy(teamsUserCredential,sendNotification)
+    props?.setCallReload(true);
   };
   const today = new Date();
   // const minDate = addMonths(today, new Date());

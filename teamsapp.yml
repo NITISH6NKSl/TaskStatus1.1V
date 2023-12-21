@@ -134,6 +134,7 @@ deploy:
       REACT_APP_START_LOGIN_PAGE_URL: ${{TAB_ENDPOINT}}/auth-start.html
       REACT_APP_FUNC_NAME: getUserProfile
       REACT_APP_FUNC_ENDPOINT: ${{API_FUNCTION_ENDPOINT}}
+      REACT_APP_TEAMS_APP_ID: a56fe797-0a5b-412d-a5a8-2e99adc0fdf3
   # Deploy bits to Azure Storage Static Website
   - uses: azureStorage/deploy
     with:

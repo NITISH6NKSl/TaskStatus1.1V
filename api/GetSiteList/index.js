@@ -106,40 +106,40 @@ module.exports = async function (context, req, teamsfxContext) {
     const graphClient = Client.initWithMiddleware({
       authProvider: authProvider,
     });
-    console.log(
+    context.log(
       "This is a context in backend of ????????????????",
       `/sites/${context.req.body.tanentUrl}:?$search="Teams_Site"&$select=sharepointIds`
     );
 
-    // console.log("Login the body for list id", context.bindings.req.body);
+    // context.log("Login the body for list id", context.bindings.req.body);
     // const listId1 = context.req.body.listid1;
     // const listId2 = context.req.body.listid2;
     try{
-    // console.log("This is to check json is comming???????", NewList[0].listSub);
-    // console.log("This is site name the body", context.req.body.siteName);
+    // context.log("This is to check json is comming???????", NewList[0].listSub);
+    // context.log("This is site name the body", context.req.body.siteName);
     const profile = await graphClient
       .api(`/sites/${context.req.body.tanentUrl}:/sites/Teams_Site`)
       .get();
     // const siteId =
     //   res.body.data.graphClientMessage.value[0]?.sharepointIds.siteId;
-    console.log("This is a api respone----->????>>???>?", profile);
+    context.log("This is a api respone----->????>>???>?", profile);
     const siteId = profile.id.split(",");
     res.body.graphClientMessage =siteId[1];
-    console.log("This is data of site id?????????", siteId[1]);
+    context.log("This is data of site id?????????", siteId[1]);
     if (profile.id) {
       const listIdMain = await graphClient
         .api(`/sites/${siteId[1]}/lists/${context.req.body?.listTodo}`)
         .get();
       res.body.listIdToDo = listIdMain.id;
-      console.log("This is a data of list check_______", listIdMain);
+      context.log("This is a data of list check_______", listIdMain);
       const listIdEntry = await graphClient
         .api(`/sites/${siteId[1]}/lists/${context.req.body?.listTaskEntry}`)
         .get();
-      console.log("This is a sub list data id >>>>>>>>>>", listIdEntry);
+      context.log("This is a sub list data id >>>>>>>>>>", listIdEntry);
       res.body.listIdToDoEntry = listIdEntry.id;
     }
     } catch(e) {
-      console.log("This is for console e.message//////////////////////////////////////////////////////",e.message)
+      context.log("This is for console e.message//////////////////////////////////////////////////////",e.message)
       if(e.message.includes("Requested site could not be found")){
         const teamsObj = {
           "template@odata.bind":
@@ -147,21 +147,21 @@ module.exports = async function (context, req, teamsfxContext) {
           displayName: "Teams_SiteFinalAPP",
           description: "My Sample Team’s Description",
         };
-        console.log("This is else suite ----->>>>>>????");
+        context.log("This is else suite ----->>>>>>????");
         const createSite = await graphClient.api(`/teams`).post(teamsObj);
   
-        console.log("This is a response in createSite?????????/", createSite);
+        context.log("This is a response in createSite?????????/", createSite);
         const siteCheckAgain = await graphClient
           .api(`/sites/${context.req.body.tanentUrl}:/sites/Teams_Site`)
           .get();
         const findSiteId = siteCheckAgain.id.split(",");
-        console.log(
+        context.log(
           "This is a site at atime of creating new site>>>>>>>>>><>>><>><<>",
           findSiteId
         );
         res.body.graphClientMessage=findSiteId[1]
   
-        console.log(
+        context.log(
           "This is a find site after creating a sit--------e",
           siteCheckAgain
         );
@@ -169,19 +169,19 @@ module.exports = async function (context, req, teamsfxContext) {
           .api(`/sites/${findSiteId[1]}/lists`)
           .post(NewList[0].listMain);
           res.body.listIdToDo=list1.id
-        console.log("This is main list created sucsee??????", list1);
+        context.log("This is main list created sucsee??????", list1);
         const list2 = await graphClient
           .api(`/sites/${findSiteId[1]}/lists`)
           .post(NewList[0].listSub);
           res.body.listIdToDoEntry=list2.id
-        console.log("This is second list created sucess>>>>>>>>>>>>>>>>>", list2);
+        context.log("This is second list created sucess>>>>>>>>>>>>>>>>>", list2);
       
 
       }
     }
      
   } catch (e) {
-    console.log("can we get the error value------", e);
+    context.log("can we get the error value------", e);
     context.log.error("This is the context catch error well------->>>>>", e);
     return {
       status: 500,

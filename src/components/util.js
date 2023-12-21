@@ -207,11 +207,10 @@ const CallGetSiteApi = async (teamsUserCredential, sendActivity) => {
         async () => (await teamsUserCredential.getToken("")).token
       )
     );
-    const response = await apiClient.get("GetSiteList", sendActivity);
-    // .then((response) => {
-    //   console.log("Log reasponse in GetSite---", response);
-    // });
-
+    const response = await apiClient.post("GetSiteList", sendActivity);
+    
+      console.log("Log reasponse in GetSite---?????", response);
+   
     return response.data;
   } catch (err) {
     let funcErrorMsg = "";
