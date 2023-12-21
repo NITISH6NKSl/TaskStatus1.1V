@@ -78,7 +78,7 @@ module.exports = async function (context, req, teamsfxContext) {
   // Query user's information from the access token.
   try {
     const currentUser = await credential.getUserInfo();
-    if (currentUser && currentUser.displayName) {
+    if (currentUser) {
       res.body.userInfoMessage = `User display name is ${currentUser.displayName}.`;
     } else {
       res.body.userInfoMessage =
