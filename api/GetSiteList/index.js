@@ -112,8 +112,8 @@ module.exports = async function (context, req, teamsfxContext) {
     );
 
     // console.log("Login the body for list id", context.bindings.req.body);
-    const listId1 = context.req.body.listid1;
-    const listId2 = context.req.body.listid2;
+    // const listId1 = context.req.body.listid1;
+    // const listId2 = context.req.body.listid2;
     try{
     // console.log("This is to check json is comming???????", NewList[0].listSub);
     // console.log("This is site name the body", context.req.body.siteName);
