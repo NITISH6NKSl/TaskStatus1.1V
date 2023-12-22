@@ -418,10 +418,11 @@ const settingSlider = {
               </CardPreview>
               :<Spinner/>}
               {}
-              {!checkData ?
+              {!checkData ?<>
+              {upComingData.length>0?<>
                <div className="upComingHeadCard" style={{paddingRight:"25px"}}>
                <Text size={300} className={styles.textColor}>Latest Up Coming Task</Text>
-               {upComingData.length>0?<Slider {...settingSlider}>
+               <Slider {...settingSlider}>
                 {upComingData?.sort((a,b)=>{return new Date(a.fields.StartDate)-new Date(b.fields.StartDate)}).map((value,index)=>{
                  const Enddate=new Date(value?.fields.EndDate)
                  const DisplayEndDate=`${Enddate.getDate()}/${Enddate.getMonth()}/${Enddate.getFullYear()}`
@@ -452,10 +453,11 @@ const settingSlider = {
                  )
                 })} 
                </Slider>
-               :<div><Text className={styles.textColor}>No Upcoming Task</Text></div>
-               }
-               
              </div>
+             </>
+             :<div><Text className={styles.textColor}>No Upcoming Task</Text></div>
+               }
+               </>
              :<Spinner/>
               }
              

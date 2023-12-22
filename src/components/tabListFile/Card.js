@@ -26,11 +26,9 @@ import {
 import {
   PlayCircle24Regular,
   RecordStop24Regular,
-  TextboxMore24Regular,
-  TextMore24Regular,
-  AppsListDetail24Regular,
   MoreHorizontal24Filled,
-  Info24Regular
+  Info24Regular,
+  Delete24Regular
 } from "@fluentui/react-icons";
 import {
   Card,
@@ -69,19 +67,7 @@ const useStyles = makeStyles({
     marginBottom: "25px",
     backgroundColor:"transparent",
   
-
-//     background: rgb(34,193,195);
-// background: linear-gradient(0deg, rgba(34,193,195,1) 0%, rgba(253,187,45,1) 100%);
   },
-  // cardHover:{
-  //   backgroundColor:"red",
-  //   width: "100%",
-  //   maxWidth: "100%",
-  //   height: "fit-content",
-  //   marginBottom: "25px",
-
-  // },
-
   text: {
     ...shorthands.margin(0),
   },
@@ -102,9 +88,7 @@ const CardComponent = (props) => {
   const [load, setLoad] = useState(false);
   const [loader, setLoader] = useState(true);
   const [newPlay, setNewPlay] = useState("");
-  // const [hoverColor,setHoverColor]=useState(false)
-  
-  // console.log("Loging the is paly in cards", isPlay);
+
   const {
     teamsUserCredential,
     listTimeArry,
@@ -120,7 +104,6 @@ const CardComponent = (props) => {
   },[newPlay]);
   useEffect(() => {
     if(props.tabName==="OnGoing"){
-      // console.log("This is a site, id and all", siteId, listToDoId);
       const obj = {
         siteId: siteId,
         listToDoId: listToDoId,
@@ -135,12 +118,6 @@ const CardComponent = (props) => {
   },[props.element]);
   const GetItemsData = async (teamsUserCredential, obj) => {
     const response = await GetItems(teamsUserCredential, obj);
-    // console.log(
-    //   "This is a play by graph of single call????????",
-    //   response?.fields.IsPlay,
-    //   response?.fields.Title
-    // );
-
     setplay(response?.fields.IsPlay);
     setLoader(false);
   };
@@ -156,28 +133,11 @@ const CardComponent = (props) => {
     return null
   });
 
-  // const CheckActualStart = () => {
-  //   console.log("This is a Arry Length data", timeEntryArr.length);
-  //   if (timeEntryArr.length >= 1) {
-  //     return timeEntryArr[0];
-  //   } else {
-  //     return undefined;
-  //   }
-  // };
-  // console.log(
-  //   "This is a TimeEntry array",
-  //   timeEntryArr.props?.element?.fields?.Title
-  // );
+ 
   timeEntryArr = timeEntryArr.sort((a, b) => new Date(a) - new Date(b));
-  // console.log(
-  //   "This is a senond arry",
-  //   timeEntryArr,
-  //   props?.element?.fields?.Title
-  // );
-
   let actualHour = 0;
   let actualMinute = 0;
-  // debugger;
+
   for (let i = 0; i < timeEntryArr.length; i += 2) {
     if (timeEntryArr.length !== i + 1) {
       const timeDifference =
@@ -211,27 +171,7 @@ const CardComponent = (props) => {
     reviwer: false,
     ActualStartBtn: false,
   };
-  // const sendActivityNotification = {
-  //   topic: {
-  //     source: "entityUrl",
-  //     value: "https://graph.microsoft.com/v1.0/chats/{chatId}",
-  //   },
-  //   activityType: "taskCreated",
-  //   previewText: {
-  //     content: "New Task Created",
-  //   },
-  //   recipient: {
-  //     "@odata.type": "microsoft.graph.aadUserNotificationRecipient",
-  //     userId: "1cc562b8-c0cd-472b-b5be-451d2758ed86",
-  //   },
-  //   templateParameters: [
-  //     {
-  //       name: "taskId",
-  //       value: "12322",
-  //     },
-  //   ],
-  // };
-  // console.log("Loging Config teams id", config.teamsAppId);
+
   const sendNotification = {
     siteId: siteId,
     listId: listToTaskEntryId,
@@ -291,12 +231,8 @@ const CardComponent = (props) => {
     },
     status:"Complete"
   };
-  console.log("This is a data in card s", props.element);
-
-  // console.log("we are checkinhg for play btn", props?.element?.fields?.IsPlay);
-  // console.log("Log dat", props);
+  // console.log("This is a data in card s", props.element);
   const Styles = useStyles();
-  // const progressBarValue=()={}
   let progreessValue =
     (ActualTime * 100) / props.element.fields.EstimatedHours / 100;
 
@@ -326,10 +262,6 @@ const CardComponent = (props) => {
 
     if (handle) {
       let objMain;
-      // console.log(
-      //   "This is tile of selected compo start date data",
-      //   props.element.fields.ActualStartDate
-      // );
       if (
         props.element.fields.ActualStartDate === undefined &&
         isActualHourSet === ""
@@ -424,6 +356,9 @@ const CardComponent = (props) => {
     await Notifiy(teamsUserCredential, sendNotification);
     props.setOnComplete(false)
   };
+  const deleteTask=(id)=>{
+    console.log("This id delete byn id",id)
+  }
 
   switch (props?.tabName) {
     case "OnGoing":
@@ -449,6 +384,7 @@ const CardComponent = (props) => {
     case "Completed":
       check.setEstimateTime = true;
       check.setActualTime = true;
+      check.removeBtn=true;
       check.ActualStartBtn = true;
       break;
     default:
@@ -690,11 +626,11 @@ const CardComponent = (props) => {
                 </>
               )}
             </div>
+            {<Tooltip><Button icon={<Delete24Regular/>} onClick={()=>deleteTask(props?.element?.fields?.id)}/></Tooltip>}
           </CardFooter>
           {check.setProgressBar && (
             <div className="progressBar">
               <Field
-                
               >
                 <ProgressBar
                   style={{ Color: "yellow" }}
