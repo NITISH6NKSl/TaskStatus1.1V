@@ -2,7 +2,7 @@ import * as React from "react";
 import { useContext, useEffect } from "react";
 import { TeamsFxContext } from "../Context";
 import config from "../sample/lib/config";
-import { GetItems } from "../util";
+import { GetItems, RemoveTask } from "../util";
 import {
   makeStyles,
   shorthands,
@@ -28,7 +28,7 @@ import {
   RecordStop24Regular,
   MoreHorizontal24Filled,
   Info24Regular,
-  Delete24Regular
+  Delete24Filled
 } from "@fluentui/react-icons";
 import {
   Card,
@@ -88,7 +88,7 @@ const CardComponent = (props) => {
   const [load, setLoad] = useState(false);
   const [loader, setLoader] = useState(true);
   const [newPlay, setNewPlay] = useState("");
-
+  const[ActualTime,setActualTime]=useState(0)
   const {
     teamsUserCredential,
     listTimeArry,
@@ -116,51 +116,50 @@ const CardComponent = (props) => {
     }
    
   },[props.element]);
+  useEffect(() => {
+    console.log("This is in useEffect data of timeEntryArray",listTimeArry)
+    setActualHr()
+  }, [listTimeArry])
   const GetItemsData = async (teamsUserCredential, obj) => {
     const response = await GetItems(teamsUserCredential, obj);
     setplay(response?.fields.IsPlay);
     setLoader(false);
   };
-
-  let timeEntryArr = [];
-  let listTimeArrId = [];
-  const listTimeEntry = listTimeArry.filter((time) => {
-    if (time?.fields?.Id0 === props?.element?.fields?.id) {
-      timeEntryArr.push(time.fields?.EntryExitTime);
-      listTimeArrId.push(time?.fields?.id);
-      return time.fields?.EntryExitTime;
+  const setActualHr=()=>{
+    let timeEntryArr = [];
+    let listTimeArrId = [];
+    const listTimeEntry = listTimeArry.filter((time) => {
+      if (time?.fields?.Id0 === props?.element?.fields?.id) {
+        timeEntryArr.push(time.fields?.EntryExitTime);
+        listTimeArrId.push(time?.fields?.id);
+        return time.fields?.EntryExitTime;
+      }
+    });
+    timeEntryArr = timeEntryArr.sort((a, b) => new Date(a) - new Date(b));
+  
+    let actualHour = 0;
+    let actualMinute = 0;
+    for (let i = 0; i < timeEntryArr.length; i += 2) {
+      if (timeEntryArr.length !== i + 1) {
+        const timeDifference =
+          new Date(timeEntryArr[i + 1]) - new Date(timeEntryArr[i]);
+  
+        const hours = Math.floor(timeDifference / (1000 * 60 * 60));
+        const minutes = Math.floor(
+          (timeDifference % (1000 * 60 * 60)) / (1000 * 60)
+        );
+        actualHour += hours;
+        actualMinute += minutes;
+      }
+      if (actualMinute > 60) {
+        actualHour += Math.floor(actualMinute / 60);
+        actualMinute = actualMinute % 60;
+      }
     }
-    return null
-  });
+    setActualTime(Number(actualHour + "." + actualMinute));
 
- 
-  timeEntryArr = timeEntryArr.sort((a, b) => new Date(a) - new Date(b));
-  let actualHour = 0;
-  let actualMinute = 0;
-
-  for (let i = 0; i < timeEntryArr.length; i += 2) {
-    if (timeEntryArr.length !== i + 1) {
-      const timeDifference =
-        new Date(timeEntryArr[i + 1]) - new Date(timeEntryArr[i]);
-
-      const hours = Math.floor(timeDifference / (1000 * 60 * 60));
-      const minutes = Math.floor(
-        (timeDifference % (1000 * 60 * 60)) / (1000 * 60)
-      );
-      actualHour += hours;
-      actualMinute += minutes;
-    }
-    if (actualMinute > 60) {
-      actualHour += Math.floor(actualMinute / 60);
-      actualMinute = actualMinute % 60;
-    }
   }
-  let ActualTime = Number(actualHour + "." + actualMinute);
-  console.log(
-    "This is a actual time",
-    ActualTime,
-    props?.element?.fields.Title
-  );
+ 
   const check = {
     date: true,
     setEstimateTime: false,
@@ -170,6 +169,7 @@ const CardComponent = (props) => {
     completeBtnVisbile: false,
     reviwer: false,
     ActualStartBtn: false,
+    isCreater:false,
   };
 
   const sendNotification = {
@@ -188,10 +188,6 @@ const CardComponent = (props) => {
         content: `${props?.element?.fields?.Title} Task Completed`,
       },
       templateParameters: [
-        // {
-        //   name: "taskId",
-        //   value: (props?.element?.fields?.id).toString(),
-        // },
         {
           name: "taskName",
           value: props?.element?.fields?.Title.toString(),
@@ -231,7 +227,6 @@ const CardComponent = (props) => {
     },
     status:"Complete"
   };
-  // console.log("This is a data in card s", props.element);
   const Styles = useStyles();
   let progreessValue =
     (ActualTime * 100) / props.element.fields.EstimatedHours / 100;
@@ -266,7 +261,6 @@ const CardComponent = (props) => {
         props.element.fields.ActualStartDate === undefined &&
         isActualHourSet === ""
       ) {
-        // console.log("This is a check length array in if");
         const ActualStartDate = new Date();
         objMain = {
           siteId: siteId,
@@ -275,7 +269,6 @@ const CardComponent = (props) => {
           field: { IsPlay: "Pause", ActualStartDate: ActualStartDate },
         };
       } else {
-        // console.log("This else condition to check listtimeArry");
         objMain = {
           siteId: siteId,
           listId: listToDoId,
@@ -284,17 +277,11 @@ const CardComponent = (props) => {
         };
       }
       Update(teamsUserCredential, objMain).then((Response) => {
-        // console.log(
-        //   "Resopone in update",
-        //   Response?.receivedHTTPRequestBody?.field?.IsPlay
-        // );
-        // console.log("Response", Response);
         setIsActualHourSet(
           Response?.receivedHTTPRequestBody?.field?.ActualStartDate
         );
         setplay(Response?.receivedHTTPRequestBody?.field?.IsPlay);
         setLocalStroage(Response?.receivedHTTPRequestBody?.field?.IsPlay);
-        // setNewPlay(true);
       });
       var date = new Date();
       const obj = {
@@ -306,7 +293,6 @@ const CardComponent = (props) => {
           Id0: props?.element?.fields?.id,
         },
       };
-      console.log("This is a paly pasuse list id", listToTaskEntryId);
       playPause(teamsUserCredential, obj).then((response) => {
         setLoad(false);
       });
@@ -337,27 +323,29 @@ const CardComponent = (props) => {
   };
   const handleCompleteBtn = async () => {
     props.setOnComplete(true)
-    // const ActualStartDate = await CheckActualStart();
-    // console.log("This is a Actual Satart date", ActualStartDate);
     const obj = {
       siteId: siteId,
       listId: listToDoId,
       itemsId: props?.element.fields.id,
       field: {
         ActualHours: ActualTime,
-        // ActualStartDate: ActualStartDate,
         Status: "Completed",
       },
     };
 
     await Update(teamsUserCredential, obj);
     await props.setCallReload(true);
-    console.log("this is going forward to nifiy");
     await Notifiy(teamsUserCredential, sendNotification);
     props.setOnComplete(false)
   };
-  const deleteTask=(id)=>{
-    console.log("This id delete byn id",id)
+  const deleteTask= async(id)=>{
+    const obj={
+      siteId: siteId,
+      listId: listToDoId,
+      itemsId:id
+    }
+    await RemoveTask(teamsUserCredential,obj);
+    await props?.setCallReload(true);
   }
 
   switch (props?.tabName) {
@@ -376,16 +364,21 @@ const CardComponent = (props) => {
       check.setProgressBar = true;
       check.completeBtnVisbile = true;
       check.date = false;
-
       break;
     case "UpComing":
       check.setEstimateTime = true;
       break;
     case "Completed":
+      if(loginuser?.userPrincipalName === props.element.createdBy.user.email){
+        check.isCreater=true;
+      }
+      else{
+        check.isCreater=false;
+      }
       check.setEstimateTime = true;
       check.setActualTime = true;
-      check.removeBtn=true;
       check.ActualStartBtn = true;
+      
       break;
     default:
       break;
@@ -522,7 +515,6 @@ const CardComponent = (props) => {
           <CardFooter
             style={{
               justifyContent: "flex-end",
-              paddingRight: "20px",
             }}
           >
             <div className="fotterContent" style={{ display: "contents" }}>
@@ -626,7 +618,9 @@ const CardComponent = (props) => {
                 </>
               )}
             </div>
-            {<Tooltip><Button icon={<Delete24Regular/>} onClick={()=>deleteTask(props?.element?.fields?.id)}/></Tooltip>}
+            {check.isCreater&&(<Tooltip content="Remove Task" withArrow>
+              <Button icon={<Delete24Filled weight="bold"/>} appearance="transparent" onClick={()=>deleteTask(props?.element?.fields?.id)}/>
+              </Tooltip>)}
           </CardFooter>
           {check.setProgressBar && (
             <div className="progressBar">

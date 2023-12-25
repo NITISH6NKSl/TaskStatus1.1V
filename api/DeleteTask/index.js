@@ -105,14 +105,18 @@ module.exports = async function (context, req, teamsfxContext) {
     const graphClient = Client.initWithMiddleware({
       authProvider: authProvider,
     });
-    // console.log("This is a to check site????????? ", context.bindings.req.body);
-    // console.log("Loging the context", context.bindings.req.rawBody);
-    const profile = await graphClient
+    // console.log("Login in backebd context", context.bindings.req.body);
+    const itemsId = context.bindings.req.body.itemsId;
+    // console.log(
+    //   "This is context body in field Set------------->>>>>",
+    //   context.bindings.req.body
+    // );
+    const removeItem = await graphClient
       .api(
-        `/sites/${context.bindings.req.body.siteId}/lists/${context.bindings.req.body.listToDoId}/items/${context.bindings.req.body.itemsId}?expand=fields`
+        `/sites/${context.bindings.req.body?.siteId}/lists/${context.bindings.req.body?.listId}/items/${itemsId}`
       )
-      .get();
-    res.body.graphClientMessage = profile;
+      .delete();
+    res.body.graphClientMessage = removeItem;
   } catch (e) {
     context.log.error(e);
     return {

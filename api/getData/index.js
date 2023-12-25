@@ -109,19 +109,19 @@ module.exports = async function (context, req, teamsfxContext) {
     // console.log("Login the body for list id", context.bindings.req.body);
     const listId1 = context.req.body.listid1;
     const listId2 = context.req.body.listid2;
-    console.log("Login the body for list id", context.req.body);
+    // console.log("Login the body for list id", context.req.body);
     const profile = await graphClient
       .api(
         `/sites/${context.req.body.siteId}/lists/${listId1}/items?$orderby=lastModifiedDateTime desc&$expand=fields`
       )
       .get();
     res.body.graphClientMessage = profile;
-    const listTime = await graphClient
+    const logTime = await graphClient
       .api(
-        `/sites/${context.req.body.siteId}/lists/${listId2}/items?$orderby=createdDateTime desc&$expand=fields`
+        `/sites/${context.req.body.siteId}/lists/${listId2}/items?$orderby=createdDateTime desc&$expand=fields&$Top=5000`
       )
       .get();
-    res.body.listArray = listTime;
+    res.body.listArray = logTime;
     const usersDetails = await graphClient.api("/users").get();
     res.body.userInfo = usersDetails;
   } catch (e) {

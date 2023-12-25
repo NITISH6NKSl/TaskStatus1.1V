@@ -1,11 +1,11 @@
-import { useContext, useState,useEffect} from "react";
+import { useContext, useState, useEffect } from "react";
 import { TeamsFxContext } from "./Context";
 import config from "./sample/lib/config";
 import AddTask from "./AddTask";
 import { GetSite } from "./util";
 import { app } from "@microsoft/teams-js";
 import Slider from "react-slick";
-import "slick-carousel/slick/slick.css"; 
+import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import {
   makeStyles,
@@ -19,7 +19,6 @@ import {
   Persona,
   CardPreview,
   Badge,
-
 } from "@fluentui/react-components";
 import { SearchBox } from "@fluentui/react-search-preview";
 import OnGoing from "./tabListFile/OnGoing";
@@ -45,9 +44,6 @@ const useStyles = makeStyles({
 
 const functionName = "getData";
 async function callFunction(teamsUserCredential, obj) {
-  // const tokenAccess = (await teamsUserCredential.getToken(""))
-  // console.log("e trying to fin Access in tab", tokenAccess)
-  // sessionStorage.setItem("accessToken",`"${tokenAccess}"`)
   if (!teamsUserCredential) {
     throw new Error("TeamsFx SDK is not initialized.");
   }
@@ -60,12 +56,7 @@ async function callFunction(teamsUserCredential, obj) {
         async () => (await teamsUserCredential.getToken("")).token
       )
     );
-
-    // cont listIdCheck=
-
     const response = await apiClient.post(functionName, obj);
-    // console.log("response Data is  in tabApp",response.data);
-
     return response.data;
   } catch (err) {
     let funcErrorMsg = "";
@@ -105,87 +96,57 @@ export default function Tab1(props) {
   const [loginuser, setLoginUser] = useState("");
   const [listData, setListData] = useState([]);
   const [userName, setUserName] = useState("");
-  const[latestTaskData,setLatestTaskData]=useState([]);
+  const [latestTaskData, setLatestTaskData] = useState([]);
   const [finalData, setFinalData] = useState([]);
-  const [presence,setPresence] =useState('')
+  const [presence, setPresence] = useState("");
   const [countTask, setCounttask] = useState({
     CountOnGoing: 0,
     CountUpcoming: 0,
     CountCompleted: 0,
   });
-const settingSlider = {
+  const settingSlider = {
     dots: true,
     infinite: false,
     speed: 500,
     slidesToShow: 1,
-    slidesToScroll: 1
+    slidesToScroll: 1,
   };
-  useEffect( () => {
-    if(teamsUserCredential){
-      getProfileIN(teamsUserCredential)
+  useEffect(() => {
+    if (teamsUserCredential) {
+      getProfileIN(teamsUserCredential);
     }
-   
-  }, [teamsUserCredential])
-  const getProfileIN=async(teamsUserCredential)=>{
-    const tempPresence= await getprofile(teamsUserCredential)
-    console.log("This is a profile presence---",tempPresence)
-    setPresence(tempPresence?.graphClientMessage?.availability)
- } 
-
-  // console.log(
-  //   "This is a id of site list",
-  //   props?.siteId,
-  //   props?.listToDoId,
-  //   props?.listToTaskEntryId
-  // );
+  }, [teamsUserCredential]);
+  const getProfileIN = async (teamsUserCredential) => {
+    const tempPresence = await getprofile(teamsUserCredential);
+    console.log("This is a profile presence---", tempPresence);
+    setPresence(tempPresence?.graphClientMessage?.availability);
+  };
 
   const styles = useStyles();
 
   const { loading, data, reload } = useData(async () => {
-    // let tanentUrl = "";
-    // let loginInfo
     setCheckData(true);
     app.initialize().then(() => {
-      // Get our frameContext from context of our app in Teams
       app.getContext().then(async (context) => {
-        if (teamsUserCredential){
-          console.log("THis is a teams user caditional",teamsUserCredential)
+        if (teamsUserCredential) {
           const userDispayName = await teamsUserCredential?.getUserInfo();
-          console.log(
-            "This is a context in main tab -----------??????",
-             context
-          );
           const loginInfo = context.user;
           setUserName(userDispayName?.displayName);
           const tanentUrl = context.sharePointSite.teamSiteDomain;
-          console.log("This is sharepoint tannet url", tanentUrl);
-  
           setLoginUser(context.user);
           const obj = {
             siteName: "Teams_Site",
             listTodo: "ToDoTask",
             listTaskEntry: "To Do Task Entry",
-            tanentUrl:context.sharePointSite.teamSiteDomain,
+            tanentUrl: context.sharePointSite.teamSiteDomain,
           };
-          console.log("This is a main begore obj", obj);
           const res = await GetSite(teamsUserCredential, obj);
-          console.log("This is response from backend ???????? for site id ", res);
           const graphSiteid = res?.graphClientMessage;
           const graphListToDoId = res?.listIdToDo;
           const graphListToTaskEntryId = res?.listIdToDoEntry;
-          console.log(
-            "This is a respone of get siteId in main??????",
-            graphSiteid,
-            graphListToDoId,
-            graphListToTaskEntryId
-          );
           setSiteId(graphSiteid);
           setListToDo(graphListToDoId);
           setListToDoTaskEntry(graphListToTaskEntryId);
-  
-          console.log("this is again a response in a usedata", res);
-  
-          console.log("this is a user context info", loginuser);
           if (!teamsUserCredential) {
             throw new Error("TeamsFx SDK is not initialized.");
           }
@@ -194,7 +155,6 @@ const settingSlider = {
             setNeedConsent(false);
           }
           if (graphSiteid && graphListToDoId && graphListToTaskEntryId) {
-            console.log("This is in check")
             try {
               const obj = {
                 siteId: graphSiteid,
@@ -202,8 +162,6 @@ const settingSlider = {
                 listid2: graphListToTaskEntryId,
               };
               const functionRes = await callFunction(teamsUserCredential, obj);
-              // console.log("This is in export function data set", functionRes);
-              // setListData(functionRes.graphClientMessage.value);
               setListTimeArry(functionRes.listArray.value);
               setUserData(functionRes.userInfo.value);
               setListData([]);
@@ -212,41 +170,43 @@ const settingSlider = {
                 CountUpcoming: 0,
                 CountCompleted: 0,
               });
-              setUpComingData([])
-              functionRes.graphClientMessage.value?.sort((a,b)=>{return  new Date(b.lastModifiedDateTime) - new Date(a.lastModifiedDateTime)}).map((val) => {
-                if (
-                  val.createdBy.user?.email === loginInfo?.userPrincipalName ||
-                  val.fields?.ReviewerMail === loginInfo?.userPrincipalName
-                ) {
-                  
-                  setListData((prev) => [...prev, val]);
+              setUpComingData([]);
+              functionRes.graphClientMessage.value
+                ?.sort((a, b) => {
+                  return (
+                    new Date(b.lastModifiedDateTime) -
+                    new Date(a.lastModifiedDateTime)
+                  );
+                })
+                .map((val) => {
                   if (
-                    new Date(val.fields?.StartDate) <= new Date() &&
-                    val.fields.Status !== "Completed"
+                    val.createdBy.user?.email ===
+                      loginInfo?.userPrincipalName ||
+                    val.fields?.ReviewerMail === loginInfo?.userPrincipalName
                   ) {
-                    setCounttask((prevObj) => ({
-                      ...prevObj,
-                      CountOnGoing: prevObj["CountOnGoing"] + 1,
-                    }));
+                    setListData((prev) => [...prev, val]);
+                    if (
+                      new Date(val.fields?.StartDate) <= new Date() &&
+                      val.fields.Status !== "Completed"
+                    ) {
+                      setCounttask((prevObj) => ({
+                        ...prevObj,
+                        CountOnGoing: prevObj["CountOnGoing"] + 1,
+                      }));
+                    }
+                    if (
+                      val?.fields.Status !== "Completed" &&
+                      new Date(val.fields?.StartDate) > new Date()
+                    ) {
+                      setCounttask((prevObj) => ({
+                        ...prevObj,
+                        CountUpcoming: prevObj["CountUpcoming"] + 1,
+                      }));
+                      setUpComingData((prev) => [...prev, val]);
+                    }
                   }
-                  if (
-                    val?.fields.Status !== "Completed" &&
-                    new Date(val.fields?.StartDate) > new Date()
-                  ) {
-                    setCounttask((prevObj) => ({
-                      ...prevObj,
-                      CountUpcoming: prevObj["CountUpcoming"] + 1,
-                    }));
-                    setUpComingData((prev)=>[...prev,val])
-                  }
-                }
-              });
+                });
               setCheckData(false);
-              // console.log(
-              //   "This is count ongoing in map function",
-              //   countTask.CountOnGoing
-              // );
-  
               return functionRes.graphClientMessage.value;
             } catch (error) {
               if (
@@ -256,17 +216,14 @@ const settingSlider = {
               }
             }
           }
-          
         }
-       
-      })
-    })
-  }); 
-  // console.log("This is a  user data -----a data", userData);
+      });
+    });
+  });
   const onTabSelect = (event, data) => {
     event.preventDefault();
     setSelectedValue(data.value);
-  }
+  };
 
   const setSearch = (e) => {
     let newArry = listData.filter((item) => {
@@ -279,48 +236,31 @@ const settingSlider = {
           .includes(e.target.value.toLowerCase())
       );
     });
-
-    // console.log("This is a new array and its length", newArry.length, newArry);
     if (newArry.length > 0) {
-      // console.log("We are in check if  of array new");
       setFinalData([]);
       setFinalData((prev) => [...prev, ...newArry]);
-    }
-    else{
+    } else {
       setFinalData([]);
     }
-    
-
-  }
-  const handleLatestTask=(value)=>{
-    setLatestTaskData([])
-     setSelectedValue("latestTask");
-    setLatestTaskData((prev)=>[...prev,value])
-
-  }
-  const checkPresence=(presence)=>{
-    console.log("This is a presence",presence)
-    if(presence==="DoNotDisturb"){
-      return "do-not-disturb"
-    }
-    else if(presence==="BeRightBack"){
-      return "be-right-back"
-
-    }
-    else {
+  };
+  const handleLatestTask = (value) => {
+    setLatestTaskData([]);
+    setSelectedValue("latestTask");
+    setLatestTaskData((prev) => [...prev, value]);
+  };
+  const checkPresence = (presence) => {
+    if (presence === "DoNotDisturb") {
+      return "do-not-disturb";
+    } else if (presence === "BeRightBack") {
+      return "be-right-back";
+    } else {
       return presence?.toLowerCase();
     }
-  }
-
-  // console.log("This is count of ongoing.....", countTask.CountOnGoing);
+  };
   if (callReload) {
     reload();
-    console.log("We are call reload function");
     setCallReload(false);
   }
-  // console.log("this is a fetched data after load", listData);
-  // console.log("This is value of upcoming  ......", upComingData);
- 
   return (
     <TeamsFxContext.Provider
       value={{
@@ -348,7 +288,6 @@ const settingSlider = {
         <div>
           <Card
             className="CardProfile"
-            // onClick={onClick}
           >
             <div
               className="Main"
@@ -365,102 +304,207 @@ const settingSlider = {
                 header={
                   <div>
                     <Persona
-                  required
-                  size="extra-large"
-                  avatar={{
-                    color: "colorful",
-                    "aria-hidden": true,
-                  }}
-                  
-                  primaryText={
-                    <Text className={styles.textColor} size={600}>
-                      {userName}
-                    </Text>
-                  }
-                  name={userName}
-                  presence={{
-                    status:  checkPresence(presence),
-                  }}
-                  secondaryText={
-                    <Text className={styles.textColor}>{presence}</Text>
-                  } 
-                  />
-                   </div>
+                      required
+                      size="extra-large"
+                      avatar={{
+                        color: "colorful",
+                        "aria-hidden": true,
+                      }}
+                      primaryText={
+                        <Text className={styles.textColor} size={600}>
+                          {userName}
+                        </Text>
+                      }
+                      name={userName}
+                      presence={{
+                        status: checkPresence(presence),
+                      }}
+                      secondaryText={
+                        <Text className={styles.textColor}>{presence}</Text>
+                      }
+                    />
+                  </div>
                 }
-            />
-           
-                
-              {!checkData?<CardPreview>
-              <div>  
-              <Text className={styles.textColor} size={350} >Total Task</Text>
-                <div style={{ display: "flex", flexDirection: "column",paddingLeft:"10px"}}>
-               
+              />
+
+              {!checkData ? (
+                <CardPreview>
                   <div>
-                  <div>
-                    <Text className={styles.textColor}>{countTask.CountOnGoing}</Text>
-                  </div>
-                    <Text className={styles.textColor} style={{}} size={100}>
-                      Task in Progress{" "}
+                    <Text className={styles.textColor} size={350}>
+                      Task
                     </Text>
-                  </div>
-                 
-                  <div>
-                  <div>
-                    <Text className={styles.textColor} >{countTask.CountUpcoming}</Text>
-                  </div>
-                    <Text className={styles.textColor} size={100} style={{}}>
-                      Up Coming Task
-                    </Text>
-                  </div>
-                 
-                </div>
-                </div>
-              </CardPreview>
-              :<Spinner/>}
-              {}
-              {!checkData ?<>
-              {upComingData.length>0?<>
-               <div className="upComingHeadCard" style={{paddingRight:"25px"}}>
-               <Text size={300} className={styles.textColor}>Latest Up Coming Task</Text>
-               <Slider {...settingSlider}>
-                {upComingData?.sort((a,b)=>{return new Date(a.fields.StartDate)-new Date(b.fields.StartDate)}).map((value,index)=>{
-                 const Enddate=new Date(value?.fields.EndDate)
-                 const DisplayEndDate=`${Enddate.getDate()}/${Enddate.getMonth()}/${Enddate.getFullYear()}`
-                 return (
-                  <div style={{display:"flex",alignItems:"center",justifyContent:"center",width:"100%",backgroundColor:"transparent"}}>
-                  <Card style={{width:"100%",background:"transparent",cursor:"pointer"}} onClick={(e)=>{handleLatestTask(value)}} >
-                    <CardHeader header={<Text className={styles.textColor} size={200} >{value.fields.Title}</Text>}/>
-                    <CardPreview
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        paddingLeft: "10px",
+                      }}
                     >
-                    <div>
-                      <div className="upComingBody" style={{display:"flex"}}>
-                      <Badge size="extra-large" shape="rounded" color="important" appearance="tint" >
-                       <div>
-                         <div className="dateBadge" style={{height:"50%"}}  ><Text className={styles.textColor} size={30}  weight="bold">{new Date(value.fields.StartDate).getDate()}</Text></div>
-                         <div className="monthBadges" ><Text className={styles.textColor} size={25}>{new Date(value.fields.StartDate).toLocaleString('default', { month: 'short' })}</Text></div>
-                       </div>
-                       </Badge>
-                      <div style={{paddingLeft:"5px"}}>
-                        <Text className={styles.textColor} size={100} >End date : {DisplayEndDate}</Text ><br/>
-                        <Text className={styles.textColor} size={100}> For {value.fields.ReviewerDipalyName}</Text >
+                      <div>
+                        <div>
+                          <Text className={styles.textColor}>
+                            {countTask.CountOnGoing}
+                          </Text>
+                        </div>
+                        <Text
+                          className={styles.textColor}
+                          style={{}}
+                          size={100}
+                        >
+                          Task in Progress{" "}
+                        </Text>
                       </div>
+
+                      <div>
+                        <div>
+                          <Text className={styles.textColor}>
+                            {countTask.CountUpcoming}
+                          </Text>
+                        </div>
+                        <Text
+                          className={styles.textColor}
+                          size={100}
+                          style={{}}
+                        >
+                          Up Coming Task
+                        </Text>
                       </div>
                     </div>
-                    </CardPreview>
-                  </Card>
-
                   </div>
-                 )
-                })} 
-               </Slider>
-             </div>
-             </>
-             :<div><Text className={styles.textColor}>No Upcoming Task</Text></div>
-               }
-               </>
-             :<Spinner/>
-              }
-             
+                </CardPreview>
+              ) : (
+                <Spinner />
+              )}
+              {}
+              {!checkData ? (
+                <>
+                  {upComingData.length > 0 ? (
+                    <>
+                      <div
+                        className="upComingHeadCard"
+                        style={{ paddingRight: "25px" }}
+                      >
+                        <Text size={300} className={styles.textColor}>
+                          Latest Up Coming Task
+                        </Text>
+                        <Slider {...settingSlider}>
+                          {upComingData
+                            ?.sort((a, b) => {
+                              return (
+                                new Date(a.fields.StartDate) -
+                                new Date(b.fields.StartDate)
+                              );
+                            })
+                            .map((value, index) => {
+                              const Enddate = new Date(value?.fields.EndDate);
+                              const DisplayEndDate = `${Enddate.getDate()}/${Enddate.getMonth()}/${Enddate.getFullYear()}`;
+                              return (
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    width: "100%",
+                                    backgroundColor: "transparent",
+                                  }}
+                                >
+                                  <Card
+                                    style={{
+                                      width: "100%",
+                                      background: "transparent",
+                                      cursor: "pointer",
+                                    }}
+                                    onClick={(e) => {
+                                      handleLatestTask(value);
+                                    }}
+                                  >
+                                    <CardHeader
+                                      header={
+                                        <Text
+                                          className={styles.textColor}
+                                          size={200}
+                                        >
+                                          {value.fields.Title}
+                                        </Text>
+                                      }
+                                    />
+                                    <CardPreview>
+                                      <div>
+                                        <div
+                                          className="upComingBody"
+                                          style={{ display: "flex" }}
+                                        >
+                                          <Badge
+                                            size="extra-large"
+                                            shape="rounded"
+                                            color="important"
+                                            appearance="tint"
+                                          >
+                                            <div>
+                                              <div
+                                                className="dateBadge"
+                                                style={{ height: "50%" }}
+                                              >
+                                                <Text
+                                                  className={styles.textColor}
+                                                  size={30}
+                                                  weight="bold"
+                                                >
+                                                  {new Date(
+                                                    value.fields.StartDate
+                                                  ).getDate()}
+                                                </Text>
+                                              </div>
+                                              <div className="monthBadges">
+                                                <Text
+                                                  className={styles.textColor}
+                                                  size={25}
+                                                >
+                                                  {new Date(
+                                                    value.fields.StartDate
+                                                  ).toLocaleString("default", {
+                                                    month: "short",
+                                                  })}
+                                                </Text>
+                                              </div>
+                                            </div>
+                                          </Badge>
+                                          <div style={{ paddingLeft: "5px" }}>
+                                            <Text
+                                              className={styles.textColor}
+                                              size={100}
+                                            >
+                                              End date : {DisplayEndDate}
+                                            </Text>
+                                            <br />
+                                            <Text
+                                              className={styles.textColor}
+                                              size={100}
+                                            >
+                                              {" "}
+                                              For{" "}
+                                              {value.fields.ReviewerDipalyName}
+                                            </Text>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </CardPreview>
+                                  </Card>
+                                </div>
+                              );
+                            })}
+                        </Slider>
+                      </div>
+                    </>
+                  ) : (
+                    <div>
+                      {/* <Text className={styles.textColor}>Upcoming Task</Text> */}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <Spinner />
+              )}
             </div>
           </Card>
         </div>
@@ -504,21 +548,20 @@ const settingSlider = {
                 </div>
                 <div style={{ display: "flex" }}>
                   <AddTask setCallReload={setCallReload} userName={userName} />
-                  
                 </div>
               </div>
-            </div>     
-              <TabList
-                selectedValue={selectedValue}
-                onTabSelect={onTabSelect}
-                // onClick={() => setCallReload(true)}
-                size="large"
-              >
-                <Tab value="OnGoing">Ongoing</Tab>
-                <Tab value="UpComing">Upcoming</Tab>
-                <Tab value="Completed">Completed</Tab>
-              </TabList>
-            
+            </div>
+            <TabList
+              selectedValue={selectedValue}
+              onTabSelect={onTabSelect}
+              // onClick={() => setCallReload(true)}
+              size="large"
+            >
+              <Tab value="OnGoing">Ongoing</Tab>
+              <Tab value="UpComing">Upcoming</Tab>
+              <Tab value="Completed">Completed</Tab>
+            </TabList>
+
             <div>
               {selectedValue === "OnGoing" && (
                 <div>
@@ -544,11 +587,11 @@ const settingSlider = {
                   />
                 </div>
               )}
-              {selectedValue ==="latestTask" && ( <div>
-                  <UpComing
-                    listData={latestTaskData}
-                  />
-                </div>)}
+              {selectedValue === "latestTask" && (
+                <div>
+                  <UpComing listData={latestTaskData} />
+                </div>
+              )}
             </div>
           </>
         )}

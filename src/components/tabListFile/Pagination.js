@@ -1,11 +1,9 @@
-import { Button,Dropdown,Option, Tooltip } from "@fluentui/react-components";
-import {ArrowNext24Regular,ArrowPrevious24Regular,IosArrowRtl24Regular,IosArrow24Regular,IosArrowLtr24Regular} from "@fluentui/react-icons";
+import { Button,Dropdown,Option, Tooltip,Text } from "@fluentui/react-components";
+import {ArrowNext24Regular,ArrowPrevious24Regular,IosArrowRtl24Regular,IosArrowLtr24Regular} from "@fluentui/react-icons";
 import { useState,useEffect } from "react";
 
-const NumberTaskArray=[1,2,3,4,5,20]
+const NumberTaskArray=[1,2,3,4,5,6]
 const Pagination =(props)=>{
-    console.log("This is a selected data in pagination",props?.numberOfTask)
-    // const [pageArry,setPageArry]=useState([])
     const [firstPage,setFirstPage]=useState()
     const [lastPage,setLastPage]=useState()
     useEffect(() => {
@@ -27,29 +25,24 @@ const Pagination =(props)=>{
         }
       };
     const handleTaskNumber=(taskNumber)=>{
-        // if(props?.pages*taskNumber<=props.selectedData.length){
             
             props?.setNumberOfTask(Number(taskNumber))
             props?.setPages(firstPage)
-        
-        
-
     }
-    // const setingFirstPage=(page)=>{
-    //     if (page==="FirstPage"){
-    //         if (props?.selectedData.length>0){
-    //             setFirstPage(1)
-    //         }
-    //     }
-    //     if (page==="LastPage"){
-    //         if(props?.selectedData.length>0){
-    //             setLastPage((Math.ceil(props?.selectedData?.length / props?.numberOfTask)))
-    //         }
-    //     }
-    // }
-//Math.ceil(props?.selectedData?.length) >= props?.numberOfTask
+    const checkSelectedTab=()=>{
+      switch(props?.selectedTab){
+        case "OnGoing":
+          return "On Going"
+        case "UpComing":
+          return "Up Coming"
+        case "Completed":
+          return "Completed"
+        default:
+          return ""
+      }
+    }
 return (<>
-    {props?.selectedData?.length >= 0 &&  (
+    {props?.selectedData?.length > 0 ?  (
       <div
         className="pagination"
         style={{ display: "flex", justifyContent: "center",columnGap: "2vw",paddingBottom:"4vh" }}
@@ -63,7 +56,6 @@ return (<>
               icon={<ArrowPrevious24Regular/>}
               onClick={()=>{
                   props.setPages(firstPage)
-                  console.log("This is to check click",firstPage)
                   }}>
                   
               </Button>
@@ -80,17 +72,14 @@ return (<>
                 iconPosition="after"
                 icon={<IosArrowLtr24Regular/>}
               />
-            </Tooltip>
-           
-              
-            
+            </Tooltip>  
         </div>
         <div className="PageIndex" style={{ display: "flex"}}>
         <div style={{height:"95%",display:"flex",alignItems:"center",paddingRight:"1vw"}}>
         <Tooltip content="Select No. Of Task" relationship="label">
         <Dropdown size="small" 
         value={props?.numberOfTask}
-        onOptionSelect={(e,data)=>{console.log("This is Option",data,)
+        onOptionSelect={(e,data)=>{
             handleTaskNumber(data.optionValue)}}
         >
             {NumberTaskArray.map((option)=>{
@@ -148,7 +137,9 @@ return (<>
                 </Tooltip>  
             </div>
       </div>
-    )}
+    ):(<div style={{display:"flex",justifyContent:"center",height:"50%",alignItems:"center"}}>
+      <Text size={500} weight="semibold" >No Any {checkSelectedTab()} Task</Text>
+      </div>)}
 
     </>
 )
