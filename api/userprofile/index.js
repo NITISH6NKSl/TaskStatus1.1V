@@ -105,8 +105,6 @@ module.exports = async function (context, req, teamsfxContext) {
     const graphClient = Client.initWithMiddleware({
       authProvider: authProvider,
     });
-    
-    // console.log("Loging the context", context.bindings.req.rawBody);
     const profile = await graphClient
       .api(
         "/me/presence"
@@ -114,14 +112,6 @@ module.exports = async function (context, req, teamsfxContext) {
       .get();
       
     res.body.graphClientMessage = profile;
-    // const profilePic = await graphClient
-    //   .api(
-    //     "/me//photos/48x48/$value"
-    //   )
-    //   .get(); 
-    //   console.log("This is a profile picture>>>>>>>>>>>>>>>>>",profilePic)
-    // res.body.profilePicture = profilePic;
-
 
   } catch (e) {
     context.log.error(e);

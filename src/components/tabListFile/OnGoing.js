@@ -19,7 +19,7 @@ const OnGoing = (props) => {
       }
     });
   }, [props?.listData]);
-  return (<>
+  return (<div>
     {onComlete?(<div style={{width:"100%",height:"100%"}}><Spinner label="Completing The Task" labelPosition="below" /> </div>): 
     <div>
     {selectedData?.slice(pages * numberOfTask - numberOfTask, pages * numberOfTask).map((element) => {
@@ -39,7 +39,7 @@ const OnGoing = (props) => {
   </div>}
    <Pagination selectedData={selectedData} pages={pages}  setPages={setPages} numberOfTask={numberOfTask} setNumberOfTask={setNumberOfTask} selectedTab="OnGoing" />
    
-  </>
+  </div>
   );
 };
 export default OnGoing;

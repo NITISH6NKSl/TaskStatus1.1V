@@ -14,5 +14,4 @@ export const TeamsFxContext = createContext({
  
 
 });
-console.log("Loging the context in context", TeamsFxContext.context);
 

@@ -26,7 +26,6 @@ import {
 import {
   PlayCircle24Regular,
   RecordStop24Regular,
-  MoreHorizontal24Filled,
   Info24Regular,
   Delete24Filled
 } from "@fluentui/react-icons";
@@ -51,17 +50,11 @@ const useStyles = makeStyles({
     ...shorthands.margin(0, 0, "8px"),
    
   },
-
-  description: {
-    ...shorthands.margin(0, 0, "10px"),
-    
-  },
   textColor:{
     color:"white"
   },
 
   card: {
-    width: "100%",
     maxWidth: "100%",
     height: "fit-content",
     marginBottom: "25px",
@@ -117,7 +110,6 @@ const CardComponent = (props) => {
    
   },[props.element]);
   useEffect(() => {
-    console.log("This is in useEffect data of timeEntryArray",listTimeArry)
     setActualHr()
   }, [listTimeArry])
   const GetItemsData = async (teamsUserCredential, obj) => {
@@ -143,7 +135,6 @@ const CardComponent = (props) => {
       if (timeEntryArr.length !== i + 1) {
         const timeDifference =
           new Date(timeEntryArr[i + 1]) - new Date(timeEntryArr[i]);
-  
         const hours = Math.floor(timeDifference / (1000 * 60 * 60));
         const minutes = Math.floor(
           (timeDifference % (1000 * 60 * 60)) / (1000 * 60)
@@ -157,9 +148,7 @@ const CardComponent = (props) => {
       }
     }
     setActualTime(Number(actualHour + "." + actualMinute));
-
   }
- 
   const check = {
     date: true,
     setEstimateTime: false,
@@ -171,7 +160,14 @@ const CardComponent = (props) => {
     ActualStartBtn: false,
     isCreater:false,
   };
+  const formateDate = (date) => {
+    const selectedDate = new Date(date); // pass in date param here
+    const formattedDate = `${
+      selectedDate.getMonth() + 1
+    }/${selectedDate.getDate()}/${selectedDate.getFullYear()}`;
 
+    return formattedDate;
+  };
   const sendNotification = {
     siteId: siteId,
     listId: listToTaskEntryId,
@@ -196,17 +192,20 @@ const CardComponent = (props) => {
     },
     sendMail: {
       message: {
-        subject: "Task  Status",
+        subject: `${props?.element?.fields?.Title} - Completed `,
         body: {
           contentType: "Text",
-          content: `${props?.element?.fields?.Title} " Task is Completed By " ${props?.element?.createdBy.user?.displayName}
-           Assignee: ${props?.element?.createdBy.user?.displayName}
-           Status: Completed
-           Reviwer:${props?.element?.fields?.ReviewerDipalyName}
-           Start Date: ${props?.element?.fields?.StartDate}
-           End Date: ${props?.element?.fields?.EndDate}
-           Estimated Hours: ${props?.element?.fields?.EstimatedHours}
-           Actual Hour : ${props?.element?.fields?.ActualHours}`,
+          content: `
+          **${props?.element?.fields?.Title}** Task is Completed By  ${props?.element?.createdBy.user?.displayName}
+
+            Assignee : ${props?.element?.createdBy.user?.displayName}
+            Status : Completed
+            Reviwer : ${props?.element?.fields?.ReviewerDipalyName}
+            Start Date : ${formateDate(props?.element?.fields?.StartDate)}
+            End Date : ${formateDate(props?.element?.fields?.EndDate)}
+            Actual Start Date : ${formateDate(props?.element?.fields?.ActualStartDate)}
+            Estimated Hours : ${(props?.element?.fields?.EstimatedHours)}
+            Actual Hour : ${ActualTime}`,
         },
         toRecipients: [
           {
@@ -241,14 +240,6 @@ const CardComponent = (props) => {
     }
   };
 
-  const formateDate = (date) => {
-    const selectedDate = new Date(date); // pass in date param here
-    const formattedDate = `${
-      selectedDate.getMonth() + 1
-    }/${selectedDate.getDate()}/${selectedDate.getFullYear()}`;
-
-    return formattedDate;
-  };
   const setLocalStroage = (data) => {
     localStorage.setItem("IsPlayCheck", data);
   };
@@ -315,7 +306,6 @@ const CardComponent = (props) => {
           Id0: props?.element?.fields?.id,
         },
       };
-      console.log("This is a paly pasuse list id", listToTaskEntryId);
       playPause(teamsUserCredential, obj).then((response) => {
         setLoad(false);
       });
@@ -335,7 +325,12 @@ const CardComponent = (props) => {
 
     await Update(teamsUserCredential, obj);
     await props.setCallReload(true);
-    await Notifiy(teamsUserCredential, sendNotification);
+    try{
+      await Notifiy(teamsUserCredential, sendNotification);
+    }
+    catch{
+      
+    }
     props.setOnComplete(false)
   };
   const deleteTask= async(id)=>{
@@ -347,7 +342,6 @@ const CardComponent = (props) => {
     await RemoveTask(teamsUserCredential,obj);
     await props?.setCallReload(true);
   }
-
   switch (props?.tabName) {
     case "OnGoing":
       if (
@@ -438,7 +432,7 @@ const CardComponent = (props) => {
                                   Reviwer : {props?.element?.fields.ReviewerDipalyName}
                                 </Text>
                               </div>
-                            
+                    
                             </DialogContent>
                             <DialogActions>
                               <DialogTrigger disableButtonEnhancement>
@@ -456,68 +450,44 @@ const CardComponent = (props) => {
               }
               description={
                 props?.element?.fields?.Descriptions ? 
-                 
-                      <Body1Strong className={Styles.description}>
-                    <div style={{display:"flex",flexDirection:"row"}}>
-                      <div> Description :{" "}</div>
-
-                    {props?.element?.fields?.Descriptions.length > 50 ? (
-                      
-                      <>
-                        <div>
-                          {trimDescription(props?.element?.fields?.Descriptions,50)}
-                        </div>
-                      <div>
-                        <Dialog
-                          className="btnDescription"
-                          style={{ display: "flex" }}
-                        >
-                          <DialogTrigger disableButtonEnhancement>
-                            <div style={{ cursor: "pointer", margin: "4px" }}>
-                              {" "}
-                              <Tooltip
-                                withArrow
-                                content={props?.element?.fields?.Descriptions}
-                                relationship="label"
-                              >
-                                <MoreHorizontal24Filled />
-                              </Tooltip>
-                            </div>
-                          </DialogTrigger>
-                          <DialogSurface className="cardCompo">
-                            <DialogBody>
-                              <DialogTitle>Task Description</DialogTitle>
-                              <DialogContent>
-                                <Text weight="bold" size={300}>{props?.element?.fields?.Descriptions}</Text>
-                              </DialogContent>
-                              <DialogActions>
-                                <DialogTrigger disableButtonEnhancement>
-                                  <Button appearance="secondary">Close</Button>
-                                </DialogTrigger>
-                              </DialogActions>
-                            </DialogBody>
-                          </DialogSurface>
-                        </Dialog>
-                        </div>
-                        </>
-                    ) : (
-                      props?.element?.fields?.Descriptions
-                    )}
-                    </div>
-                  </Body1Strong>
-                  
-                      : null  
-                  
+                <Dialog
+                className="btnDescription"
+                style={{ display: "flex" }}
+              >
+                  <DialogTrigger disableButtonEnhancement>
+                      <Tooltip
+                        withArrow
+                        content="Descriptions"
+                        relationship="label"
+                      >
+                        <Body1Strong className="description" truncate wrap={false} >
+                            Description:{props?.element?.fields?.Descriptions}
+                        </Body1Strong>
+                      </Tooltip>
+                  </DialogTrigger>
+                  <DialogSurface className="cardCompo">
+                    <DialogBody>
+                      <DialogTitle>Task Description</DialogTitle>
+                      <DialogContent>
+                        <Text weight="bold" size={300}>{props?.element?.fields?.Descriptions}</Text>
+                      </DialogContent>
+                      <DialogActions>
+                        <DialogTrigger disableButtonEnhancement>
+                          <Button appearance="secondary">Close</Button>
+                        </DialogTrigger>
+                      </DialogActions>
+                    </DialogBody>
+                  </DialogSurface>
+              </Dialog>
+                   : null    
               }
             />
           </div>
-
+          <div style={{marginTop:"5px"}}>
           <CardFooter
-            style={{
-              justifyContent: "flex-end",
-            }}
+           className={props?.tabName==="OnGoing"?("cardFooterContent"):"footerComplete"}
           >
-            <div className="fotterContent" style={{ display: "contents" }}>
+            <div className="fotterContent" style={{ display: "contents"}}>
               {check.date && (
                 <>
                   <Body1Strong className={Styles.cardbodyText}>
@@ -622,6 +592,7 @@ const CardComponent = (props) => {
               <Button icon={<Delete24Filled weight="bold"/>} appearance="transparent" onClick={()=>deleteTask(props?.element?.fields?.id)}/>
               </Tooltip>)}
           </CardFooter>
+          </div>
           {check.setProgressBar && (
             <div className="progressBar">
               <Field

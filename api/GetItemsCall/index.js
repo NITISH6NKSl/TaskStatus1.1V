@@ -105,8 +105,6 @@ module.exports = async function (context, req, teamsfxContext) {
     const graphClient = Client.initWithMiddleware({
       authProvider: authProvider,
     });
-    // console.log("This is a to check site????????? ", context.bindings.req.body);
-    // console.log("Loging the context", context.bindings.req.rawBody);
     const profile = await graphClient
       .api(
         `/sites/${context.bindings.req.body.siteId}/lists/${context.bindings.req.body.listToDoId}/items/${context.bindings.req.body.itemsId}?expand=fields`

@@ -105,11 +105,8 @@ module.exports = async function (context, req, teamsfxContext) {
     const graphClient = Client.initWithMiddleware({
       authProvider: authProvider,
     });
-
-    // console.log("Login the body for list id", context.bindings.req.body);
     const listId1 = context.req.body.listid1;
     const listId2 = context.req.body.listid2;
-    // console.log("Login the body for list id", context.req.body);
     const profile = await graphClient
       .api(
         `/sites/${context.req.body.siteId}/lists/${listId1}/items?$orderby=lastModifiedDateTime desc&$expand=fields`

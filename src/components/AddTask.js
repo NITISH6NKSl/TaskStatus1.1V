@@ -33,7 +33,7 @@ const useStyles = makeStyles({
   },
 });
 const AddTask = (props) => {
-  const { teamsUserCredential, userData, listToDoId, siteId } =
+  const { teamsUserCredential, userData, listToDoId, siteId,loginuser } =
     useContext(TeamsFxContext);
   const [taskTitle, setTaskTitle] = useState("");
   const [descripiton, setDiscription] = useState("");
@@ -47,14 +47,21 @@ const AddTask = (props) => {
   const [ReviewerUserId, setReviewerId] = useState("")
 
   const styles = useStyles();
+  const formateDate = (date) => {
+    const selectedDate = new Date(date); // pass in date param here
+    const formattedDate = `${
+      selectedDate.getMonth() + 1
+    }/${selectedDate.getDate()}/${selectedDate.getFullYear()}`;
 
+    return formattedDate;
+  };
   const sendNotification = {
     siteId: siteId,
     reviewerUserId:ReviewerUserId ,
     sendActivityNotification: {
       topic: {
         source: "text",
-        value: "Task Completed",
+        value: "Task Added",
         webUrl: `https://teams.microsoft.com/l/entity/${config.teamsAppId}/index`,
       },
       activityType: "taskAdded",
@@ -74,13 +81,15 @@ const AddTask = (props) => {
     },
     sendMail: {
       message: {
-        subject: `${taskTitle} - Task Assined To You`,
+        subject: `${taskTitle} - Task Assigned To You`,
         body: {
           contentType: "Text",
-          content: `${taskTitle} " Task is Added By " ${props?.userName}
-           Start Date: ${StartDate}
-           End Date: ${EndDate}
-           Estimated Hours: ${EstimatedHours}
+          content:` 
+            **${taskTitle}** Task is Added By ${props?.userName}
+
+             Start Date : ${formateDate(StartDate)}
+             End Date : ${formateDate(EndDate)}
+             Estimated Hours : ${EstimatedHours}
            `,
         },
         toRecipients: [
@@ -101,30 +110,8 @@ const AddTask = (props) => {
       saveToSentItems: "false",
     },
   };
-  // Initialize teams app
-  // let context;
-  // app.initialize().then(async () => {
-  //   // Get our frameContext from context of our app in Teams
-  //   context = await app.getContext();
-  //   // console.log("Loging the context", context);
-  //   // console.log("firstkese ho", context);
-  //   // setTeamsPageType(context?.page.frameContext);
-  //   /* if (context.page.frameContext == "meetingStage") {
-  //     view = "stage";
-  //   }
-  //   const theme = context.app.theme;
-  //   if (theme == "default") {
-  //     color = "black";
-  //   }
-  //   app.registerOnThemeChangeHandler(function (theme) {
-  //     color = theme === "default" ? "black" : "white";
-  //   }); */
-  // });
-  console.log("This is a list id in add task", listToDoId);
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // const userLookup = await GetUser(teamsUserCredential, Reviewer);
-    // console.log("This is user lookup", userLookup);
     setAddTaskLoad(true);
     const obj = {
       listId: listToDoId,
@@ -135,31 +122,18 @@ const AddTask = (props) => {
         Title: taskTitle,
         IsPlay: "Play",
         EstimatedHours: EstimatedHours,
-        // ReviwerLookupId: userLookup?.toString(),
         ReviewerDipalyName: ReviwerDisplayName,
-        // ReviewerId: userLookup?.toString(),
         ReviewerId: ReviewerUserId,
         Status: "UpComing",
         Descriptions: descripiton,
         ReviewerMail: ReviewerEmail,
       },
     };
-    // console.log("submit Trigred");
-    // console.log(
-    //   "Loging all data ",
-    //   StartDate,
-    //   EndDate,
-    //   descripiton,
-    //   Reviewer,
-    //   taskTitle,
-    //   EstimatedHours
-    // );
     await addTasklist(teamsUserCredential, obj);
     await Notifiy(teamsUserCredential,sendNotification)
     props?.setCallReload(true);
   };
   const today = new Date();
-  // const minDate = addMonths(today, new Date());
   const maxDate = addYears(today, 1);
 
   const onFormatDate = (date) => {
@@ -169,7 +143,7 @@ const AddTask = (props) => {
   };
 
   const ClearState = (e) => {
-    // e.preventDefault();
+    
     setTaskTitle("");
     setDiscription("");
     setEstimatedHours("");
@@ -179,21 +153,6 @@ const AddTask = (props) => {
     setReviwerDisplayName("");
     setReviewerEmail("");
   };
-  // people
-  //   .selectPeople({
-  //     setSelected: ["aad id"],
-  //     openOrgWideSearchInChatOrChannel: true,
-  //     singleSelect: false,
-  //     title: true,
-  //   })
-  //   .then((people) => {
-  //     console.log(
-  //       " People length: " + people.length + " " + JSON.stringify(people)
-  //     );
-  //   })
-  // .catch((error) => {
-  //   /*Unsuccessful operation*/
-  // });
   return (
     <div className="dialog_form">
       <Dialog modalType="alert">
@@ -316,12 +275,12 @@ const AddTask = (props) => {
                       placeholder="Select Reviwer"
                     >
                       {userData?.map((userData) => {
+                        if(!(userData.id===loginuser.id)){
                         return (
                           <Option
                             required
                             text={userData.displayName}
                             key={userData.id}
-                            // id={userData.id}
                             value={userData}
                           >
                             <Persona
@@ -338,6 +297,7 @@ const AddTask = (props) => {
                             />
                           </Option>
                         );
+                        }
                       })}
                     </Dropdown>
                   </DialogContent>
@@ -350,7 +310,6 @@ const AddTask = (props) => {
                     <Button
                       type="submit"
                       appearance="primary"
-                      //   onSubmit={handleSubmit}
                       disabled={isButtonDiabled}
                     >
                       Submit

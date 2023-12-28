@@ -10,20 +10,14 @@ const UpComing = (props) => {
   useEffect(() => {
     setselectedData([]);
     props?.listData.forEach((element) => {
-      // console.log("This is created by", element.createdBy.email);
-      // console.log("This is Reviwer in ", element.fields.Reviwer);
       if (
         element?.fields.Status !== "Completed" &&
         new Date(element.fields?.StartDate) > new Date()
-        // (element.createdBy.user.email === loginuser.userPrincipalName ||
-        //   element.fields.ReviewerMail === loginuser.userPrincipalName)
       ) {
         setselectedData((prev) => [...prev, element]);
       }
     });
   }, [props?.listData]);
-  console.log("this is selected data ", selectedData);
-  console.log("This is a data");
   return (
     <div>
       {selectedData?.slice(pages * numberOfTask - numberOfTask, pages * numberOfTask).map((element) => {

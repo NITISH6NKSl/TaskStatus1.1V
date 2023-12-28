@@ -112,30 +112,30 @@ module.exports = async function (context, req, teamsfxContext) {
       "Checking in GetNottification-----------",
       context.bindings.req.body
     );
-    const userId =req.body.reviewerUserId;
-    const client = await graphClient
+    try{
+      const userId =req.body.reviewerUserId;
+      const client = await graphClient
       .api(`/users/${userId}/teamwork/sendActivityNotification`)
       .post(context.bindings.req.body.sendActivityNotification);
 
     res.body.graphClientMessage = client;
+    }
+    catch{
+      res.body.ActivityNotification="User Not In This App";
+    }
     const clientMail = await graphClient
       .api("/me/sendMail")
       .post(context.bindings.req.body.sendMail);
     res.body.mailApiResponse = clientMail;
-    // context?.bindings?.req?.body?.listTimeArrId.forEach(async (element) => {
-    // //   // res.body.graphClientMessage = ;
-    // // });
-    // console.log("This is a ,", context?.bindings?.req?.body?.componentId);
     if(context.bindings.req.body.status==="Complete"){
     const listTime = await graphClient
       .api(
         `/sites/${context?.bindings?.req?.body?.siteId}/lists/${context?.bindings?.req?.body.listId}/items?$orderby=createdDateTime desc&$expand=fields`
       )
       .get();
-    // console.log("This is a listTime array", listTime);
     listTime?.value?.forEach(async (element) => {
       if (context?.bindings?.req?.body?.componentId === element?.fields?.Id0) {
-        /* const Deleteitems = */ await graphClient
+       await graphClient
           .api(
             `/sites/c5fa4bd2-2e58-4052-a66c-48590bf3ab3d/lists/${context?.bindings?.req?.body.listId}/items/${element.id}`
           )

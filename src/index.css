@@ -11,12 +11,45 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-@media only screen and (max-width: 768px) {
+@media only screen and (max-width: 768px){
   body {
     width: fit-content;
     height: fit-content;
   }
 }
+@media only screen and ((max-width: 480px) and (min-width:0px) ){
+  body {
+    width: 100%;
+    height: 100%;
+
+  }
+  .footerComplete{
+    /* justify-content:flex-start; */
+    flex-wrap: wrap;
+  }
+  .upComingHeadCard{
+    padding-right: 7vw !important ;
+    width: 41vw !important;  
+  } 
+  .searchBoxfield{
+    width: 65% !important;
+  }
+  .description{
+    width: 300px !important;
+  }
+  .headerTask{
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+  }
+
+  
+}
+/* @media only screen and ((max-width: 769px) and (min-width:1200px) ){
+  body {
+    width: fit-content;
+    height: fit-content;
+  }
+} */
 .textValue{
   background-color: #1aebff;
   border-radius: 4px;
@@ -52,20 +85,6 @@ body {
   margin-bottom: 25px,
 }
 .cardCompo{
-  
-  /* background: rgb(67,57,161);
-  background: radial-gradient(circle, rgba(67,57,161,1) 0%, rgba(238,174,198,1) 100%); */
-  /* background: rgb(238,174,198);
-background: radial-gradient(circle, rgba(238,174,198,1) 0%, rgba(67,57,161,1) 100%); */
-/* background: rgb(207,174,238);
-background: radial-gradient(circle, rgba(207,174,238,1) 0%, rgba(67,57,161,1) 100%); */
-/* background: linear-gradient(to right, #ff6666 0%, #990099 100%); */
-/* background: rgb(207,174,238);
-background: radial-gradient(circle, rgba(207,174,238,1) 0%, rgba(67,57,161,1) 100%); */
-/* background: rgb(100,85,233);
-background: linear-gradient(7deg, rgba(100,85,233,1) 0%, rgba(128,80,236,1) 62%, rgba(111,39,180,1) 100%); */
-/* background: rgb(63,94,251);
-background: linear-gradient(90deg, rgba(63,94,251,1) 0%, rgba(252,70,107,1) 100%); */
 background-color: #5390d9;
 }
 .f1qga665 {
@@ -83,8 +102,8 @@ background-color: #5390d9;
 }
 .upComingHeadCard{
   background: transparent;
-  width: 250px;
-  margin-right:"50px"
+  padding-right: "4vw";
+  width: 245px;
 }
 .fui-CardPreview{
   margin: 0 !important;
@@ -98,4 +117,18 @@ background-color: #5390d9;
 }
 .f1exfvgq {
   min-width: 1% !important;
+}
+.f4akndk {
+  column-gap: 5px !important;
+}
+.cardFooterContent{
+  justify-content: flex-end;
+  flex-wrap:wrap
+}
+.description{
+  overflow:hidden;
+  width: 500px;
+  display:block;
+  flex-wrap:wrap;
+  cursor:pointer;
 }

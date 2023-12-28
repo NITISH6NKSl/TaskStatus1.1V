@@ -105,12 +105,7 @@ module.exports = async function (context, req, teamsfxContext) {
     const graphClient = Client.initWithMiddleware({
       authProvider: authProvider,
     });
-    // console.log("Login in backebd context", context.bindings.req.body);
     const itemsId = context.bindings.req.body.itemsId;
-    // console.log(
-    //   "This is context body in field Set------------->>>>>",
-    //   context.bindings.req.body
-    // );
     const removeItem = await graphClient
       .api(
         `/sites/${context.bindings.req.body?.siteId}/lists/${context.bindings.req.body?.listId}/items/${itemsId}`

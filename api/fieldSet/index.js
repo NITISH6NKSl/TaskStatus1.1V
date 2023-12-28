@@ -105,12 +105,7 @@ module.exports = async function (context, req, teamsfxContext) {
     const graphClient = Client.initWithMiddleware({
       authProvider: authProvider,
     });
-    // console.log("Login in backebd context", context.bindings.req.body);
     const itemsId = context.bindings.req.body.itemsId;
-    // console.log(
-    //   "This is context body in field Set------------->>>>>",
-    //   context.bindings.req.body
-    // );
     const profile = await graphClient
       .api(
         `/sites/${context.bindings.req.body?.siteId}/lists/${context.bindings.req.body?.listId}/items/${itemsId}/fields`
@@ -118,12 +113,6 @@ module.exports = async function (context, req, teamsfxContext) {
       .update(context.bindings.req.body.field);
     res.body.graphClientMessage = profile;
 
-    // const clientNotify = await graphClient;
-    // await clientNotify
-    //   .api(`/users/${userId}/teamwork/sendActivityNotification`)
-    //   .post(context.bindings.req.body);
-
-    // res.body.graphClientMessage = clientNotify;
   } catch (e) {
     context.log.error(e);
     return {

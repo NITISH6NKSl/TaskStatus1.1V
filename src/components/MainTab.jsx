@@ -118,7 +118,6 @@ export default function Tab1(props) {
   }, [teamsUserCredential]);
   const getProfileIN = async (teamsUserCredential) => {
     const tempPresence = await getprofile(teamsUserCredential);
-    console.log("This is a profile presence---", tempPresence);
     setPresence(tempPresence?.graphClientMessage?.availability);
   };
 
@@ -140,7 +139,7 @@ export default function Tab1(props) {
             listTaskEntry: "To Do Task Entry",
             tanentUrl: context.sharePointSite.teamSiteDomain,
           };
-          const res = await GetSite(teamsUserCredential, obj);
+          const res = await GetSite(teamsUserCredential,obj);
           const graphSiteid = res?.graphClientMessage;
           const graphListToDoId = res?.listIdToDo;
           const graphListToTaskEntryId = res?.listIdToDoEntry;
@@ -291,7 +290,7 @@ export default function Tab1(props) {
           >
             <div
               className="Main"
-              style={{ display: "flex", justifyContent: "space-between" }}
+              style={{ display: "flex", justifyContent: "space-between"}}
             >
               <CardHeader
                 // image={
@@ -329,7 +328,7 @@ export default function Tab1(props) {
 
               {!checkData ? (
                 <CardPreview>
-                  <div>
+                  <div className="headerTask" style={{paddingRight: "6vw",paddingLeft:"3vw"}}>
                     <Text className={styles.textColor} size={350}>
                       Task
                     </Text>
@@ -337,7 +336,7 @@ export default function Tab1(props) {
                       style={{
                         display: "flex",
                         flexDirection: "column",
-                        paddingLeft: "10px",
+                        
                       }}
                     >
                       <div>
@@ -347,8 +346,7 @@ export default function Tab1(props) {
                           </Text>
                         </div>
                         <Text
-                          className={styles.textColor}
-                          style={{}}
+                        className={styles.textColor}
                           size={100}
                         >
                           Task in Progress{" "}
@@ -379,10 +377,10 @@ export default function Tab1(props) {
               {!checkData ? (
                 <>
                   {upComingData.length > 0 ? (
-                    <>
+                    
                       <div
                         className="upComingHeadCard"
-                        style={{ paddingRight: "25px" }}
+                        
                       >
                         <Text size={300} className={styles.textColor}>
                           Latest Up Coming Task
@@ -404,13 +402,12 @@ export default function Tab1(props) {
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
-                                    width: "100%",
                                     backgroundColor: "transparent",
                                   }}
                                 >
                                   <Card
                                     style={{
-                                      width: "100%",
+                    
                                       background: "transparent",
                                       cursor: "pointer",
                                     }}
@@ -495,7 +492,7 @@ export default function Tab1(props) {
                             })}
                         </Slider>
                       </div>
-                    </>
+                    
                   ) : (
                     <div>
                       {/* <Text className={styles.textColor}>Upcoming Task</Text> */}
@@ -534,11 +531,12 @@ export default function Tab1(props) {
                 <div
                   style={{
                     display: "flex",
-                    width: "55%",
+                    width: "65%",
                     justifyContent: "flex-end",
                   }}
                 >
                   <SearchBox
+                  className="searchBoxfield"
                     placeholder="Search Task By Title"
                     style={{ width: "50%" }}
                     onChange={(e) => {
@@ -546,7 +544,7 @@ export default function Tab1(props) {
                     }}
                   />
                 </div>
-                <div style={{ display: "flex" }}>
+                <div style={{ display: "flex",width: "35%",justifyContent:"end"}}>
                   <AddTask setCallReload={setCallReload} userName={userName} />
                 </div>
               </div>
