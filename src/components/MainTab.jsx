@@ -19,6 +19,12 @@ import {
   Persona,
   CardPreview,
   Badge,
+  Dialog,
+  DialogBody,
+  DialogContent,
+  DialogActions,
+  DialogTrigger,
+  Button,
 } from "@fluentui/react-components";
 import { SearchBox } from "@fluentui/react-search-preview";
 import OnGoing from "./tabListFile/OnGoing";
@@ -99,6 +105,8 @@ export default function Tab1(props) {
   const [latestTaskData, setLatestTaskData] = useState([]);
   const [finalData, setFinalData] = useState([]);
   const [presence, setPresence] = useState("");
+  const [addPermission, setAddPermissions] = useState(true);
+  // const [popUpDialog, setPopUpDialog] = useState(false);
   const [countTask, setCounttask] = useState({
     CountOnGoing: 0,
     CountUpcoming: 0,
@@ -127,25 +135,40 @@ export default function Tab1(props) {
     setCheckData(true);
     app.initialize().then(() => {
       app.getContext().then(async (context) => {
+        let siteList;
         if (teamsUserCredential) {
           const userDispayName = await teamsUserCredential?.getUserInfo();
           const loginInfo = context.user;
           setUserName(userDispayName?.displayName);
           const tanentUrl = context.sharePointSite.teamSiteDomain;
           setLoginUser(context.user);
-          const obj = {
-            siteName: "Teams_Site",
-            listTodo: "ToDoTask",
-            listTaskEntry: "To Do Task Entry",
-            tanentUrl: context.sharePointSite.teamSiteDomain,
-          };
-          const res = await GetSite(teamsUserCredential,obj);
-          const graphSiteid = res?.graphClientMessage;
-          const graphListToDoId = res?.listIdToDo;
-          const graphListToTaskEntryId = res?.listIdToDoEntry;
-          setSiteId(graphSiteid);
-          setListToDo(graphListToDoId);
-          setListToDoTaskEntry(graphListToTaskEntryId);
+          if (localStorage.getItem("getSiteList")) {
+            siteList = JSON.parse(localStorage.getItem("getSiteList"));
+            setSiteId(siteList.graphSiteid);
+            setListToDo(siteList.graphListToDoId);
+            setListToDoTaskEntry(siteList.graphListToTaskEntryId);
+          } else {
+            const obj = {
+              siteName: "Teams_Site",
+              listTodo: "ToDoTask",
+              listTaskEntry: "To Do Task Entry",
+              tanentUrl: context.sharePointSite.teamSiteDomain,
+            };
+            const res = await GetSite(teamsUserCredential, obj);
+            console.log("This is the response of get site", res);
+
+            const siteObj = {
+              graphSiteid: res?.graphClientMessage,
+              graphListToDoId: res?.listIdToDo,
+              graphListToTaskEntryId: res?.listIdToDoEntry,
+            };
+            setSiteId(res?.graphClientMessage);
+            setListToDo(res?.listIdToDo);
+            setListToDoTaskEntry(res?.listIdToDoEntry);
+            const siteObjString = JSON.stringify(siteObj);
+            localStorage.setItem("getSiteList", siteObjString);
+          }
+
           if (!teamsUserCredential) {
             throw new Error("TeamsFx SDK is not initialized.");
           }
@@ -153,60 +176,79 @@ export default function Tab1(props) {
             await teamsUserCredential.login(["User.Read"]);
             setNeedConsent(false);
           }
-          if (graphSiteid && graphListToDoId && graphListToTaskEntryId) {
+          if (localStorage.getItem("getSiteList")) {
             try {
               const obj = {
-                siteId: graphSiteid,
-                listid1: graphListToDoId,
-                listid2: graphListToTaskEntryId,
+                siteId: JSON.parse(localStorage.getItem("getSiteList"))
+                  .graphSiteid,
+                listid1: JSON.parse(localStorage.getItem("getSiteList"))
+                  .graphListToDoId,
+                listid2: JSON.parse(localStorage.getItem("getSiteList"))
+                  .graphListToTaskEntryId,
               };
               const functionRes = await callFunction(teamsUserCredential, obj);
-              setListTimeArry(functionRes.listArray.value);
-              setUserData(functionRes.userInfo.value);
-              setListData([]);
-              setCounttask({
-                CountOnGoing: 0,
-                CountUpcoming: 0,
-                CountCompleted: 0,
-              });
-              setUpComingData([]);
-              functionRes.graphClientMessage.value
-                ?.sort((a, b) => {
-                  return (
-                    new Date(b.lastModifiedDateTime) -
-                    new Date(a.lastModifiedDateTime)
-                  );
-                })
-                .map((val) => {
-                  if (
-                    val.createdBy.user?.email ===
-                      loginInfo?.userPrincipalName ||
-                    val.fields?.ReviewerMail === loginInfo?.userPrincipalName
-                  ) {
-                    setListData((prev) => [...prev, val]);
-                    if (
-                      new Date(val.fields?.StartDate) <= new Date() &&
-                      val.fields.Status !== "Completed"
-                    ) {
-                      setCounttask((prevObj) => ({
-                        ...prevObj,
-                        CountOnGoing: prevObj["CountOnGoing"] + 1,
-                      }));
-                    }
-                    if (
-                      val?.fields.Status !== "Completed" &&
-                      new Date(val.fields?.StartDate) > new Date()
-                    ) {
-                      setCounttask((prevObj) => ({
-                        ...prevObj,
-                        CountUpcoming: prevObj["CountUpcoming"] + 1,
-                      }));
-                      setUpComingData((prev) => [...prev, val]);
-                    }
-                  }
+              console.log("This is a function response////", functionRes);
+              if (functionRes.NoUser === "No User Permissions") {
+                console.log(
+                  "this is a condition for user having no permission to tannet"
+                );
+                setCheckData(false);
+                setAddPermissions(false);
+              } else if (
+                functionRes.userInfo &&
+                functionRes.graphClientMessage
+              ) {
+                console.log(
+                  "This is else if condition for user present in tannent"
+                );
+                setListData([]);
+                setCounttask({
+                  CountOnGoing: 0,
+                  CountUpcoming: 0,
+                  CountCompleted: 0,
                 });
+                setUpComingData([]);
+
+                setUserData(functionRes?.userInfo?.value);
+                functionRes?.graphClientMessage?.value
+                  ?.sort((a, b) => {
+                    return (
+                      new Date(b.lastModifiedDateTime) -
+                      new Date(a.lastModifiedDateTime)
+                    );
+                  })
+                  .map((val) => {
+                    if (
+                      val.createdBy.user?.email ===
+                        loginInfo?.userPrincipalName ||
+                      val.fields?.ReviewerMail === loginInfo?.userPrincipalName
+                    ) {
+                      setListData((prev) => [...prev, val]);
+                      if (
+                        new Date(val.fields?.StartDate) <= new Date() &&
+                        val.fields.Status !== "Completed"
+                      ) {
+                        setCounttask((prevObj) => ({
+                          ...prevObj,
+                          CountOnGoing: prevObj["CountOnGoing"] + 1,
+                        }));
+                      }
+                      if (
+                        val?.fields.Status !== "Completed" &&
+                        new Date(val.fields?.StartDate) > new Date()
+                      ) {
+                        setCounttask((prevObj) => ({
+                          ...prevObj,
+                          CountUpcoming: prevObj["CountUpcoming"] + 1,
+                        }));
+                        setUpComingData((prev) => [...prev, val]);
+                      }
+                    }
+                  });
+                setCheckData(false);
+                return functionRes.graphClientMessage.value;
+              }
               setCheckData(false);
-              return functionRes.graphClientMessage.value;
             } catch (error) {
               if (
                 error.message.includes("The application may not be authorized.")
@@ -223,9 +265,11 @@ export default function Tab1(props) {
     event.preventDefault();
     setSelectedValue(data.value);
   };
-
   const setSearch = (e) => {
     let newArry = listData.filter((item) => {
+      // let ff = item?.fields?.Title?.toLowerCase().includes(e.target.value.toLowerCase());
+      // let gg = item.createdBy?.user.displayName?.toLowerCase().includes(e.target.value.toLowerCase())
+
       return (
         item?.fields?.Title?.toLowerCase().includes(
           e.target.value.toLowerCase()
@@ -260,6 +304,10 @@ export default function Tab1(props) {
     reload();
     setCallReload(false);
   }
+  // const onCloseFunction = () => {
+  //   setPopUpDialog(false);
+  //   props?.setCallReload(true);
+  // };
   return (
     <TeamsFxContext.Provider
       value={{
@@ -285,12 +333,10 @@ export default function Tab1(props) {
         }
       >
         <div>
-          <Card
-            className="CardProfile"
-          >
+          <Card className="CardProfile">
             <div
               className="Main"
-              style={{ display: "flex", justifyContent: "space-between"}}
+              style={{ display: "flex", justifyContent: "space-between" }}
             >
               <CardHeader
                 // image={
@@ -328,46 +374,50 @@ export default function Tab1(props) {
 
               {!checkData ? (
                 <CardPreview>
-                  <div className="headerTask" style={{paddingRight: "6vw",paddingLeft:"3vw"}}>
-                    <Text className={styles.textColor} size={350}>
-                      Task
+                  <div
+                    className="headerTask"
+                    style={{
+                      paddingRight: "6vw",
+                      paddingLeft: "3vw",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      rowGap: "0.5vw",
+                    }}
+                  >
+                    <Text className={styles.textColor} size={300}>
+                      Total task-{" "}
+                      {countTask.CountOnGoing + countTask.CountUpcoming}
                     </Text>
-                    <div
+                    {/* <div
                       style={{
                         display: "flex",
                         flexDirection: "column",
                         
                       }}
                     >
-                      <div>
-                        <div>
+                      <div> */}
+                    {/* <div>
                           <Text className={styles.textColor}>
                             {countTask.CountOnGoing}
                           </Text>
-                        </div>
-                        <Text
-                        className={styles.textColor}
-                          size={100}
-                        >
-                          Task in Progress{" "}
-                        </Text>
-                      </div>
+                        </div> */}
+                    <Text className={styles.textColor} size={300}>
+                      Inprogress task- {countTask.CountOnGoing}
+                    </Text>
+                    {/* </div>
 
-                      <div>
-                        <div>
+                      <div> */}
+                    {/* <div>
                           <Text className={styles.textColor}>
                             {countTask.CountUpcoming}
                           </Text>
-                        </div>
-                        <Text
-                          className={styles.textColor}
-                          size={100}
-                          style={{}}
-                        >
-                          Up Coming Task
-                        </Text>
-                      </div>
-                    </div>
+                        </div> */}
+                    <Text className={styles.textColor} size={300} style={{}}>
+                      Upcoming task- {countTask.CountUpcoming}
+                    </Text>
+                    {/* </div>
+                    </div> */}
                   </div>
                 </CardPreview>
               ) : (
@@ -377,122 +427,121 @@ export default function Tab1(props) {
               {!checkData ? (
                 <>
                   {upComingData.length > 0 ? (
-                    
-                      <div
-                        className="upComingHeadCard"
-                        
-                      >
-                        <Text size={300} className={styles.textColor}>
-                          Latest Up Coming Task
-                        </Text>
-                        <Slider {...settingSlider}>
-                          {upComingData
-                            ?.sort((a, b) => {
-                              return (
-                                new Date(a.fields.StartDate) -
-                                new Date(b.fields.StartDate)
-                              );
-                            })
-                            .map((value, index) => {
-                              const Enddate = new Date(value?.fields.EndDate);
-                              const DisplayEndDate = `${Enddate.getDate()}/${Enddate.getMonth()}/${Enddate.getFullYear()}`;
-                              return (
-                                <div
+                    <div className="upComingHeadCard">
+                      <Text size={300} className={styles.textColor}>
+                        Latest upcoming task
+                      </Text>
+                      <Slider {...settingSlider}>
+                        {upComingData
+                          ?.sort((a, b) => {
+                            return (
+                              new Date(a.fields.StartDate) -
+                              new Date(b.fields.StartDate)
+                            );
+                          }).slice(0,4)
+                          .map((value, index) => {
+                            console.log("This is a end date")
+                            const Enddate = new Date(value?.fields.EndDate);
+                            console.log("This is a full date",Enddate)
+                            console.log("This is a end date month",Enddate.getMonth()+1)
+                            const DisplayEndDate = `${Enddate.getDate()}/${Enddate.getMonth()+1}/${Enddate.getFullYear()}`;
+                            return (
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  backgroundColor: "transparent",
+                                }}
+                              >
+                                <Card className="latestUpcomingCard"
                                   style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    backgroundColor: "transparent",
+                                    background: "transparent",
+                                    cursor: "pointer",
+                                  }}
+                                  onClick={(e) => {
+                                    handleLatestTask(value);
                                   }}
                                 >
-                                  <Card
-                                    style={{
-                    
-                                      background: "transparent",
-                                      cursor: "pointer",
-                                    }}
-                                    onClick={(e) => {
-                                      handleLatestTask(value);
-                                    }}
-                                  >
-                                    <CardHeader
-                                      header={
-                                        <Text
-                                          className={styles.textColor}
-                                          size={200}
+                                  <CardHeader
+                                    header={
+                                      <diV style={{paddingBottom:"5px"}}>
+                                      <Text
+                                        className={styles.textColor}
+                                        size={300}
+                                      >
+                                        {value.fields.Title}
+                                      </Text>
+                                      </diV>
+                                    }
+                                  />
+                                  <CardPreview>
+                                    <div>
+                                      <div
+                                        className="upComingBody"
+                                        style={{ display: "flex" }}
+                                      >
+                                        <Badge
+                                          size="extra-large"
+                                          shape="rounded"
+                                          color="informative"
+                                          appearance="outline"
                                         >
-                                          {value.fields.Title}
-                                        </Text>
-                                      }
-                                    />
-                                    <CardPreview>
-                                      <div>
-                                        <div
-                                          className="upComingBody"
-                                          style={{ display: "flex" }}
-                                        >
-                                          <Badge
-                                            size="extra-large"
-                                            shape="rounded"
-                                            color="important"
-                                            appearance="tint"
-                                          >
-                                            <div>
-                                              <div
-                                                className="dateBadge"
-                                                style={{ height: "50%" }}
+                                          <div>
+                                            <div
+                                              className="dateBadge"
+                                              style={{ height: "50%" }}
+                                            >
+                                              <Text
+                                                className={styles.textColor}
+                                                size={30}
+                                                weight="bold"
                                               >
-                                                <Text
-                                                  className={styles.textColor}
-                                                  size={30}
-                                                  weight="bold"
-                                                >
-                                                  {new Date(
-                                                    value.fields.StartDate
-                                                  ).getDate()}
-                                                </Text>
-                                              </div>
-                                              <div className="monthBadges">
-                                                <Text
-                                                  className={styles.textColor}
-                                                  size={25}
-                                                >
-                                                  {new Date(
-                                                    value.fields.StartDate
-                                                  ).toLocaleString("default", {
-                                                    month: "short",
-                                                  })}
-                                                </Text>
-                                              </div>
+                                                {new Date(
+                                                  value.fields.StartDate
+                                                ).getDate()}
+                                              </Text>
                                             </div>
-                                          </Badge>
-                                          <div style={{ paddingLeft: "5px" }}>
-                                            <Text
-                                              className={styles.textColor}
-                                              size={100}
-                                            >
-                                              End date : {DisplayEndDate}
-                                            </Text>
-                                            <br />
-                                            <Text
-                                              className={styles.textColor}
-                                              size={100}
-                                            >
-                                              {" "}
-                                              For{" "}
-                                              {value.fields.ReviewerDipalyName}
-                                            </Text>
+                                            <div className="monthBadges">
+                                              <Text
+                                                className={styles.textColor}
+                                                size={25}
+                                              >
+                                                {new Date(
+                                                  value.fields.StartDate
+                                                ).toLocaleString("default", {
+                                                  month: "short",
+                                                })}
+                                              </Text>
+                                            </div>
                                           </div>
+                                        </Badge>
+                                        <div style={{ paddingLeft: "5px" }}>
+                                          <Text
+                                            className={styles.textColor}
+                                            size={100}
+                                          >
+                                            End date : {DisplayEndDate}
+                                          </Text>
+                                          <br />
+                                          <Text
+                                            className={styles.textColor}
+                                            size={100}
+                                          >
+                                            {" "}
+                                            For{" "}
+                                            {value.fields.ReviewerDipalyName}
+                                          </Text>
                                         </div>
                                       </div>
-                                    </CardPreview>
-                                  </Card>
-                                </div>
-                              );
-                            })}
-                        </Slider>
-                      </div>
-                    
+                                    </div>
+                                  </CardPreview>
+                                </Card>
+                              </div>
+                            );
+                          })}
+                      </Slider>
+                    </div>
                   ) : (
                     <div>
                       {/* <Text className={styles.textColor}>Upcoming Task</Text> */}
@@ -536,16 +585,27 @@ export default function Tab1(props) {
                   }}
                 >
                   <SearchBox
-                  className="searchBoxfield"
-                    placeholder="Search Task By Title"
+                    className="searchBoxfield"
+                    placeholder="Search task by title"
                     style={{ width: "50%" }}
                     onChange={(e) => {
                       setSearch(e);
                     }}
                   />
                 </div>
-                <div style={{ display: "flex",width: "35%",justifyContent:"end"}}>
-                  <AddTask setCallReload={setCallReload} userName={userName} />
+                <div
+                  style={{
+                    display: "flex",
+                    width: "35%",
+                    justifyContent: "end",
+                  }}
+                >
+                  {addPermission && (
+                    <AddTask
+                      setCallReload={setCallReload}
+                      userName={userName}
+                    />
+                  )}
                 </div>
               </div>
             </div>

@@ -105,24 +105,15 @@ module.exports = async function (context, req, teamsfxContext) {
     const graphClient = Client.initWithMiddleware({
       authProvider: authProvider,
     });
-    try{
-      const listId1 = context.req.body.listid1;
-      const listId2 = context.req.body.listid2;
-      const profile = await graphClient
-        .api(
-          `/sites/${context.req.body.siteId}/lists/${listId1}/items?$orderby=lastModifiedDateTime desc&$expand=fields`
-        )
-        .get();
-      res.body.graphClientMessage = profile;
-    }catch(e){
-      context.log("This is a message of catch from backend getData",e.message);
-      if(e.message.includes("Invalid hostname for this tenancy")){
-        res.body.NoUser="No User Permissions"
-      }
-    }
-   
-    const usersDetails = await graphClient.api("/users").get();
-    res.body.userInfo = usersDetails;
+    const listId2 = context.req.body.listid2;
+    const logTime = await graphClient
+      .api(
+        `/sites/${context.req.body.siteId}/lists/${listId2}/items?$orderby=createdDateTime desc&$expand=fields&$Top=5000`
+      )
+      .get();
+    res.body.listArray = logTime;
+    // const usersDetails = await graphClient.api("/users").get();
+    // res.body.userInfo = usersDetails;
   } catch (e) {
     context.log.error(e);
     return {

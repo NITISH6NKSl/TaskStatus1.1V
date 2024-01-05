@@ -110,7 +110,7 @@ module.exports = async function (context, req, teamsfxContext) {
         `/sites/${context.bindings.req.body.siteId}/lists/${context.bindings.req.body.listId}/items`
       )
       .post({ fields: context.bindings.req.body.field });
-    res.body.graphClientMessage = profile;
+    res.body.graphClientMessage = "Task Added";
   } catch (e) {
     context.log.error(e);
     return {

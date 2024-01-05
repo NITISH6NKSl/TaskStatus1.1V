@@ -14,6 +14,7 @@ import {
   Option,
   Persona,
   Spinner,
+  Text
 } from "@fluentui/react-components";
 
 import { ClipboardTaskAdd24Filled } from "@fluentui/react-icons";
@@ -45,7 +46,8 @@ const AddTask = (props) => {
   const [ReviewerEmail, setReviewerEmail] = useState();
   const [addTaskLoad, setAddTaskLoad] = useState(false)
   const [ReviewerUserId, setReviewerId] = useState("")
-
+  const [popUpDialog,setPopUpDialog]=useState(false)
+  const [addTaskRes,setAddtaskRes]=useState("")
   const styles = useStyles();
   const formateDate = (date) => {
     const selectedDate = new Date(date); // pass in date param here
@@ -120,8 +122,7 @@ const AddTask = (props) => {
         StartDate: StartDate,
         EndDate: EndDate,
         Title: taskTitle,
-        IsPlay: "Play",
-        EstimatedHours: EstimatedHours,
+        EstimatedHours:EstimatedHours,
         ReviewerDipalyName: ReviwerDisplayName,
         ReviewerId: ReviewerUserId,
         Status: "UpComing",
@@ -129,20 +130,34 @@ const AddTask = (props) => {
         ReviewerMail: ReviewerEmail,
       },
     };
-    await addTasklist(teamsUserCredential, obj);
-    await Notifiy(teamsUserCredential,sendNotification)
-    props?.setCallReload(true);
+    const AddTaskRes=await addTasklist(teamsUserCredential,obj)
+    console.log("This is a response from backend",AddTaskRes)
+    if (AddTaskRes.graphClientMessage==="Task Added"){
+      await Notifiy(teamsUserCredential,sendNotification)
+      setAddTaskLoad(false)
+      // ClearState()
+      // alert("Task added succcessfully")
+      setAddtaskRes("succeeded")
+      setPopUpDialog(true)
+      setTimeout(onCloseFunction,1000)
+      
+    }
+    else{
+      setAddtaskRes("Task added Failed")
+      setPopUpDialog(true)
+      setTimeout(onCloseFunction,1000)
+      
+    }
   };
   const today = new Date();
-  const maxDate = addYears(today, 1);
-
+  const maxDate = addYears(today,1);
   const onFormatDate = (date) => {
     return !date
       ? ""
       : `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
   };
 
-  const ClearState = (e) => {
+  const ClearState = () => {
     
     setTaskTitle("");
     setDiscription("");
@@ -153,6 +168,11 @@ const AddTask = (props) => {
     setReviwerDisplayName("");
     setReviewerEmail("");
   };
+    const onCloseFunction = () => {
+    setPopUpDialog(false);
+    props?.setCallReload(true);
+  };
+ 
   return (
     <div className="dialog_form">
       <Dialog modalType="alert">
@@ -160,14 +180,11 @@ const AddTask = (props) => {
           <Button
             appearance="primary"
             icon={<ClipboardTaskAdd24Filled />}
-            // onClick={(e) => {
-            //   getUserData(e, teamsUserCredential);
-            // }}
           >
-            Add Task
+            Add task
           </Button>
         </DialogTrigger>
-
+        {!popUpDialog?
         <DialogSurface aria-describedby={undefined}>
           <form
             onSubmit={(e) => {
@@ -179,10 +196,10 @@ const AddTask = (props) => {
             ) : (
               <>
                 <DialogBody>
-                  <DialogTitle>Add New Task</DialogTitle>
+                  <DialogTitle>Add new task</DialogTitle>
                   <DialogContent className={styles.content}>
                     <Label required htmlFor={"Task_title"}>
-                      Task Title
+                      Task title
                     </Label>
                     <Input
                       required
@@ -194,7 +211,7 @@ const AddTask = (props) => {
                         }
                       }}
                       value={taskTitle}
-                      placeholder="Enter a Task Title"
+                      placeholder="Enter task title"
                     />
                     <Label required htmlFor={"descripition"}>
                       Descriptions
@@ -209,17 +226,17 @@ const AddTask = (props) => {
                         }
                       }}
                       value={descripiton}
-                      placeholder="Enter a Task Descriptions"
+                      placeholder="Enter task descriptions"
                     />
 
                     <Label required htmlFor={"dateTime"}>
-                      Start Date Time
+                      Startdate
                     </Label>
                     <DatePicker
                       required
                       minDate={new Date()}
                       maxDate={maxDate}
-                      placeholder="Select a date..."
+                      placeholder="Select start date "
                       formatDate={onFormatDate}
                       value={StartDate}
                       onSelectDate={setsatrtDate}
@@ -227,13 +244,13 @@ const AddTask = (props) => {
                       className={styles.inputControl}
                     />
                     <Label required htmlFor={"EndDateTime"}>
-                      End Date Time
+                      Enddate
                     </Label>
                     <DatePicker
                       required
                       minDate={StartDate}
                       maxDate={maxDate}
-                      placeholder="Select a date..."
+                      placeholder="Select end date"
                       formatDate={onFormatDate}
                       allowTextInput
                       className={styles.inputControl}
@@ -241,23 +258,23 @@ const AddTask = (props) => {
                       onSelectDate={setEnddate}
                     />
                     <label required htmlFor={"EstimatedHour"}>
-                      Estimated Hours <span style={{ color: "red" }}> *</span>
+                      Estimated time <span style={{ color: "red" }}> *</span>
                     </label>
                     <Input
                       required
-                      type="Number"
+                      type="time"
                       id={"EstimatedHour"}
                       onChange={(e) => {
-                        if (e.target?.value < 100) {
+                        // if (e.target?.value < 100 && e.target?.value>=0) {
                           setEstimatedHours(e.target.value);
-                        }
+                        //  }
                       }}
                       value={EstimatedHours}
-                      placeholder="Enter a Estimated Hour in Number"
+                      placeholder="Enter estimated time"
                     />
 
-                    <label required htmlFor="Reviwer">
-                      Reviwer <span style={{ color: "red" }}> *</span>
+                    <label required htmlFor="Reviewer">
+                    Reviewer <span style={{ color: "red" }}> *</span>
                     </label>
                     <Dropdown
                       required
@@ -272,7 +289,7 @@ const AddTask = (props) => {
 
                         setButtonDisabled(false);
                       }}
-                      placeholder="Select Reviwer"
+                      placeholder="Select Reviewer"
                     >
                       {userData?.map((userData) => {
                         if(!(userData.id===loginuser.id)){
@@ -320,6 +337,22 @@ const AddTask = (props) => {
             )}
           </form>
         </DialogSurface>
+        :(
+        <DialogSurface>
+        <DialogBody>
+            <DialogContent>
+              <Text size={300} weight="bold" style={{textAlign:"center"}}>Adding Task {addTaskRes}</Text>
+            </DialogContent>
+            <DialogActions>
+                    <DialogTrigger disableButtonEnhancement>
+                      <Button appearance="secondary" onClick={onCloseFunction}>
+                        Close
+                      </Button>
+                    </DialogTrigger>
+                  </DialogActions>
+          </DialogBody>
+          </DialogSurface>
+          )}
       </Dialog>
     </div>
   );

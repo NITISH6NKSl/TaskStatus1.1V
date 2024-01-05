@@ -24,15 +24,15 @@ body {
 
   }
   .footerComplete{
-    /* justify-content:flex-start; */
-    flex-wrap: wrap;
+    justify-content:flex-start !important;
+    flex-wrap: wrap !important;
   }
   .upComingHeadCard{
     padding-right: 7vw !important ;
     width: 41vw !important;  
   } 
   .searchBoxfield{
-    width: 65% !important;
+    width: 70% !important;
   }
   .description{
     width: 300px !important;
@@ -92,7 +92,6 @@ background-color: #5390d9;
 }
 .CardProfile{
   background: radial-gradient(44.14% 315.57% at 17.92% 34.85%,#009dd2 0,#304899 84.93%);
-
 }
 .dateBox{
   background-color: lightgray;
@@ -102,8 +101,8 @@ background-color: #5390d9;
 }
 .upComingHeadCard{
   background: transparent;
-  padding-right: "4vw";
-  width: 245px;
+  padding-right: 4vw;
+  width: 250px;
 }
 .fui-CardPreview{
   margin: 0 !important;
@@ -127,8 +126,17 @@ background-color: #5390d9;
 }
 .description{
   overflow:hidden;
-  width: 500px;
+  width: 400px;
   display:block;
   flex-wrap:wrap;
   cursor:pointer;
 }
+.footerComplete{
+  justify-content: flex-end;
+  align-items: center;
+}
+/* .latestUpcomingCard{
+  background: "transparent";
+  cursor: "pointer";
+
+} */

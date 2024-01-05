@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect,useContext } from "react";
 import Pagination from "./Pagination";
+import { TeamsFxContext } from "@microsoft/teamsfx-react";
 
 import CardComponent from "./Card";
 
@@ -7,6 +8,14 @@ const Completed = (props) => {
   const [pages, setPages] = useState(1);
   const [selectedData, setselectedData] = useState([]);
   const [numberOfTask,setNumberOfTask]=useState(5)
+  // const {
+  //   teamsUserCredential,
+  //   listTimeArry,
+  //   loginuser,
+  //   siteId,
+  //   listToDoId,
+  //   listToTaskEntryId,
+  // } = useContext(TeamsFxContext);
   useEffect(() => {
     setselectedData([]);
     props?.listData.forEach((element) => {

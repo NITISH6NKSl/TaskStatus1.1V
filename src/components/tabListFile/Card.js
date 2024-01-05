@@ -79,17 +79,22 @@ const CardComponent = (props) => {
   const [isPlay, setplay] = useState("");
   const [isActualHourSet, setIsActualHourSet] = useState("");
   const [load, setLoad] = useState(false);
+  const [completeDisable,setCompleteDisable]=useState(true)
   const [loader, setLoader] = useState(true);
   const [newPlay, setNewPlay] = useState("");
   const[ActualTime,setActualTime]=useState(0)
   const {
     teamsUserCredential,
-    listTimeArry,
     loginuser,
     siteId,
     listToDoId,
     listToTaskEntryId,
   } = useContext(TeamsFxContext);
+  const itemobj = {
+    siteId: siteId,
+    listToDoId: listToDoId,
+    itemsId: props.element.fields.id,
+  };
   useEffect(() => {
     if (load) {
       handleToggelBtn(newPlay);
@@ -97,30 +102,40 @@ const CardComponent = (props) => {
   },[newPlay]);
   useEffect(() => {
     if(props.tabName==="OnGoing"){
-      const obj = {
-        siteId: siteId,
-        listToDoId: listToDoId,
-        itemsId: props.element.fields.id,
-      };
-      GetItemsData(teamsUserCredential, obj);
+     
+      GetItemsData(teamsUserCredential, itemobj);
     }
     else{
       setLoader(false);
     }
    
-  },[props.element]);
+  },[props,teamsUserCredential]);
   useEffect(() => {
-    setActualHr()
-  }, [listTimeArry])
+    if(props.listTimeArry?.length>=2){
+      setActualHr()
+    }
+    
+  }, [props.listTimeArry])
   const GetItemsData = async (teamsUserCredential, obj) => {
     const response = await GetItems(teamsUserCredential, obj);
-    setplay(response?.fields.IsPlay);
-    setLoader(false);
+    if (response?.fields?.IsPlay===undefined){
+        setplay("Play")
+        setCompleteDisable(false)
+        setLoader(false)
+        console.log("We are in if condition set play",response.fields.Title)
+    }
+    else{
+      setplay(response?.fields?.IsPlay);
+      setLoader(false);
+      console.log("we are in a setplay else condition",response.fields.Title)
+    }
+    
+    
   };
   const setActualHr=()=>{
     let timeEntryArr = [];
     let listTimeArrId = [];
-    const listTimeEntry = listTimeArry.filter((time) => {
+    props.listTimeArry?.forEach((time) => {
       if (time?.fields?.Id0 === props?.element?.fields?.id) {
         timeEntryArr.push(time.fields?.EntryExitTime);
         listTimeArrId.push(time?.fields?.id);
@@ -140,14 +155,15 @@ const CardComponent = (props) => {
           (timeDifference % (1000 * 60 * 60)) / (1000 * 60)
         );
         actualHour += hours;
-        actualMinute += minutes;
+        actualMinute += (Number(minutes) < 10) ? parseInt("0" + minutes, 10) : parseInt(minutes, 10);
       }
-      if (actualMinute > 60) {
-        actualHour += Math.floor(actualMinute / 60);
-        actualMinute = actualMinute % 60;
+      if (Number(actualMinute) > 60) {
+        actualHour += Math.floor(Number(actualMinute) / 60);
+        actualMinute = Math.floor(Number(actualMinute) % 60);
       }
+      
     }
-    setActualTime(Number(actualHour + "." + actualMinute));
+    setActualTime(Number(actualHour.toString() +"."+ actualMinute.toString()));
   }
   const check = {
     date: true,
@@ -159,6 +175,7 @@ const CardComponent = (props) => {
     reviwer: false,
     ActualStartBtn: false,
     isCreater:false,
+    removeBtn:false,
   };
   const formateDate = (date) => {
     const selectedDate = new Date(date); // pass in date param here
@@ -228,8 +245,7 @@ const CardComponent = (props) => {
   };
   const Styles = useStyles();
   let progreessValue =
-    (ActualTime * 100) / props.element.fields.EstimatedHours / 100;
-
+    (ActualTime * 100) / (props.element.fields.EstimatedHours).toString().replace(":",".") / 100;
   const ProgressColor = () => {
     if (ActualTime && progreessValue <= 0.8) {
       return "success";
@@ -239,7 +255,7 @@ const CardComponent = (props) => {
       return "error";
     }
   };
-
+console.log("This is to check complete button of any task",props?.element?.fields?.Title,completeDisable)
   const setLocalStroage = (data) => {
     localStorage.setItem("IsPlayCheck", data);
   };
@@ -247,6 +263,9 @@ const CardComponent = (props) => {
   const handleToggelBtn = (handle) => {
 
     if (handle) {
+      if(!completeDisable){
+        setCompleteDisable(true)
+      }
       let objMain;
       if (
         props.element.fields.ActualStartDate === undefined &&
@@ -307,12 +326,15 @@ const CardComponent = (props) => {
         },
       };
       playPause(teamsUserCredential, obj).then((response) => {
+        props.setOnPause(true)
         setLoad(false);
+       
       });
     }
   };
   const handleCompleteBtn = async () => {
     props.setOnComplete(true)
+
     const obj = {
       siteId: siteId,
       listId: listToDoId,
@@ -334,12 +356,14 @@ const CardComponent = (props) => {
     props.setOnComplete(false)
   };
   const deleteTask= async(id)=>{
+    check.removeBtn=true
     const obj={
       siteId: siteId,
       listId: listToDoId,
       itemsId:id
     }
     await RemoveTask(teamsUserCredential,obj);
+    check.removeBtn=false
     await props?.setCallReload(true);
   }
   switch (props?.tabName) {
@@ -412,24 +436,24 @@ const CardComponent = (props) => {
                                {props?.element?.fields.Title}
                                <Divider appearance="strong" ></Divider>
                             </DialogTitle>
-                            
-                            
                             <DialogContent>
-                            
                             <div style={{display:"flex",flexDirection:"column",rowGap:"10px"}}>
                             
-                                <Text weight="bold">Description: {trimDescription(props?.element?.fields?.Descriptions,50)}</Text>
+                                <Text weight="bold">Description: <Text>{trimDescription(props?.element?.fields?.Descriptions,50)}</Text></Text>
                                 <Text weight="bold">
-                                  StartDate : {formateDate(props?.element.fields.StartDate)}
+                                  Start date: <Text>{formateDate(props?.element.fields.StartDate)}</Text>
                                 </Text>
                                 <Text weight="bold">
-                                  EndDate : {formateDate(props?.element?.fields.EndDate)}
+                                  End date: <Text>{formateDate(props?.element?.fields.EndDate)}</Text>
+                                </Text>
+                                <Text weight="bold"><span>{props?.element?.fields?.EstimatedHours}</span>
+                                  {/* Estimated time: <Text>  {props?.element?.fields?.EstimatedHours&&(props?.element?.fields?.EstimatedHours).toString().includes(".")?
+                    (props?.element?.fields?.EstimatedHours).toString().replace(".",":"):
+                    `${props?.element?.fields?.EstimatedHours}:00` */}
+                    
                                 </Text>
                                 <Text weight="bold">
-                                  Estimated Time : {props?.element?.fields.EstimatedHours}
-                                </Text>
-                                <Text weight="bold">
-                                  Reviwer : {props?.element?.fields.ReviewerDipalyName}
+                                Reviewer: <Text>{props?.element?.fields.ReviewerDipalyName}</Text>
                                 </Text>
                               </div>
                     
@@ -441,12 +465,9 @@ const CardComponent = (props) => {
                             </DialogActions>
                           </DialogBody>
                         </DialogSurface>
-                      </Dialog>
-                                      
+                      </Dialog>                
                   </div>
-  
                 </div>
-                
               }
               description={
                 props?.element?.fields?.Descriptions ? 
@@ -457,17 +478,18 @@ const CardComponent = (props) => {
                   <DialogTrigger disableButtonEnhancement>
                       <Tooltip
                         withArrow
-                        content="Descriptions"
+                        content="Description"
                         relationship="label"
                       >
-                        <Body1Strong className="description" truncate wrap={false} >
-                            Description:{props?.element?.fields?.Descriptions}
+                        <Body1Strong className="description"  wrap={true} >
+                            Description: {trimDescription(props?.element?.fields?.Descriptions,60)}
+                            <span></span>
                         </Body1Strong>
                       </Tooltip>
                   </DialogTrigger>
                   <DialogSurface className="cardCompo">
                     <DialogBody>
-                      <DialogTitle>Task Description</DialogTitle>
+                      <DialogTitle>Task description</DialogTitle>
                       <DialogContent>
                         <Text weight="bold" size={300}>{props?.element?.fields?.Descriptions}</Text>
                       </DialogContent>
@@ -491,13 +513,13 @@ const CardComponent = (props) => {
               {check.date && (
                 <>
                   <Body1Strong className={Styles.cardbodyText}>
-                    Start Date :{"  "}
+                    Start date :{"  "}
                     <span className="textValue">
                       {formateDate(props?.element?.fields?.StartDate)}
                     </span>
                   </Body1Strong>
                   <Body1Strong className={Styles.cardbodyText}>
-                    End Date :{"  "}
+                    End date :{"  "}
                     <span className="textValue">
                       {formateDate(props?.element?.fields?.EndDate)}
                     </span>
@@ -506,15 +528,15 @@ const CardComponent = (props) => {
               )}
               {check.setEstimateTime && (
                 <Body1Strong>
-                  Estimated Hour :{"  "}
+                  Estimated time :{"  "}
                   <span className="textValue">
-                    {props?.element?.fields?.EstimatedHours}
+                 {props?.element?.fields?.EstimatedHours}
                   </span>
                 </Body1Strong>
               )}
               {check.ActualStartBtn && (
                 <Body1Strong>
-                  Actual Satrt Date:{" "}
+                  Actual satrt date:{" "}
                   <span className="textValue">
                     {formateDate(props?.element?.fields?.ActualStartDate)}
                   </span>
@@ -522,12 +544,20 @@ const CardComponent = (props) => {
               )}
               {check.setActualTime && (
                 <Body1Strong>
-                  Actual Hour :{"  "}
+                  Actual time:{"  "}
                   <span className="textValue">
                     {props?.element?.fields?.ActualHours}
                   </span>
                 </Body1Strong>
               )}
+              {check.isCreater&&(<>
+              {!check.removeBtn?
+              <Tooltip content="Remove Task" withArrow>
+              <Delete24Filled style={{cursor:"pointer"}} appearance="transparent" onClick={()=>deleteTask(props?.element?.fields?.id)}/>
+              </Tooltip>
+              :<Spinner label="Removing Task" labelPosition="below"></Spinner>
+              }
+              </>)}
               {check.reviwer ? (
                 ""
               ) : (
@@ -545,13 +575,16 @@ const CardComponent = (props) => {
                             content="Start"
                             relationship="label"
                             >
-                            <PlayCircle24Regular
-                              style={{ cursor: "pointer",}}
-                              onClick={() => {
+                              <Button icon={<PlayCircle24Regular/>}
+                              size="large"
+                              appearance="transparent"
+                              shape="circular"
+                               onClick={() => {
                                 setLoad(true);
                                 setNewPlay(true);
                               }}
-                            />
+                              
+                              />
                             </Tooltip>
                           ) : (
                             <Tooltip
@@ -559,12 +592,14 @@ const CardComponent = (props) => {
                             content="Stop"
                             relationship="label"
                             >
-                            <RecordStop24Regular
-                              style={{ cursor: "pointer",}}
+                            <Button icon={<RecordStop24Regular/>}
+                              size="large"
+                              shape="circular"
+                              appearance="transparent"
                               onClick={() => {
                                 setLoad(true);
                                 setNewPlay(false);
-                              }}
+                              }} 
                             />
                             </Tooltip>
                           ))}
@@ -573,7 +608,7 @@ const CardComponent = (props) => {
                           content="Complete Task"
                           relationship="label">
                           <Button
-                            disabled={isPlay === "Pause"}
+                            disabled={isPlay === "Pause"||!completeDisable}
                             appearance="primary"
                             onClick={handleCompleteBtn}
                             style={{ marginLeft: "1vw" }}
@@ -587,10 +622,7 @@ const CardComponent = (props) => {
                   )}
                 </>
               )}
-            </div>
-            {check.isCreater&&(<Tooltip content="Remove Task" withArrow>
-              <Button icon={<Delete24Filled weight="bold"/>} appearance="transparent" onClick={()=>deleteTask(props?.element?.fields?.id)}/>
-              </Tooltip>)}
+            </div>   
           </CardFooter>
           </div>
           {check.setProgressBar && (
@@ -598,13 +630,12 @@ const CardComponent = (props) => {
               <Field
               >
                 <ProgressBar
-                  style={{ Color: "yellow" }}
                   className={Styles.container}
                   thickness="large"
                   value={progreessValue}
                   color={ProgressColor()}
                 />
-                Task ProgressBar
+                Task progressbar
               </Field>
             </div>
           )}

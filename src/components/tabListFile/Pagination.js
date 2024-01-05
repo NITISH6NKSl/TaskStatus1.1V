@@ -138,7 +138,7 @@ return (<>
             </div>
       </div>
     ):(<div style={{display:"flex",justifyContent:"center",height:"50%",alignItems:"center"}}>
-      <Text size={500} weight="semibold" >No Any {checkSelectedTab()} Task</Text>
+      <Text size={500} weight="semibold" >No data available</Text>
       </div>)}
 
     </>

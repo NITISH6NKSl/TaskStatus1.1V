@@ -1,7 +1,7 @@
 {
     "id": "${{AAD_APP_OBJECT_ID}}",
     "appId": "${{AAD_APP_CLIENT_ID}}",
-    "name": "TaskStatus1.1-aad",
+    "name": "Task status",
     "accessTokenAcceptedVersion": 2,
     "signInAudience": "AzureADMyOrg",
     "optionalClaims": {
