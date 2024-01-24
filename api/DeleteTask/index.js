@@ -112,6 +112,7 @@ module.exports = async function (context, req, teamsfxContext) {
       )
       .delete();
     res.body.graphClientMessage = removeItem;
+    res.body.successMessage="Deleted"
   } catch (e) {
     context.log.error(e);
     return {

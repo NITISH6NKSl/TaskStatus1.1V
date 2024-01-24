@@ -120,9 +120,12 @@ module.exports = async function (context, req, teamsfxContext) {
         res.body.NoUser="No User Permissions"
       }
     }
-   
-    const usersDetails = await graphClient.api("/users").get();
+    console.log("This is a check for data in onGoin tab??????????????????/////////",context.req.body)
+    if(context.req.body.userKey==='userProfile'){
+      const usersDetails = await graphClient.api("/users").get();
     res.body.userInfo = usersDetails;
+    }
+    
   } catch (e) {
     context.log.error(e);
     return {

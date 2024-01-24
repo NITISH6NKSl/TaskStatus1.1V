@@ -39,155 +39,6 @@ const callBackendFun = async (teamsUserCredential, obj,func) => {
   }
 };
 
-// const AddTaskApi = async (teamsUserCredential, obj) => {
-//   if (!teamsUserCredential) {
-//     throw new Error("TeamsFx SDK is not initialized.");
-//   }
-//   try {
-//     const apiBaseUrl = config.apiEndpoint + "/api/";
-//     // createApiClient(...) creates an Axios instance which uses BearerTokenAuthProvider to inject token to request header
-//     const apiClient = createApiClient(
-//       apiBaseUrl,
-//       new BearerTokenAuthProvider(
-//         async () => (await teamsUserCredential.getToken("")).token
-//       )
-//     );
-//     const response = await apiClient.post("addTask", obj);
-//     return response.data;
-//   } catch (err) {
-//     let funcErrorMsg = "";
-//     if (err?.response?.status === 404) {
-//       funcErrorMsg = `There may be a problem with the deployment of Azure Function App, please deploy Azure Function (Run command palette "Teams: Deploy") first before running this App`;
-//     } else if (err.message === "Network Error") {
-//       funcErrorMsg =
-//         "Cannot call Azure Function due to network error, please check your network connection status and ";
-//       if (err.config.url.indexOf("localhost") >= 0) {
-//         funcErrorMsg += `make sure to start Azure Function locally (Run "npm run start" command inside api folder from terminal) first before running this App`;
-//       } else {
-//         funcErrorMsg += `make sure to provision and deploy Azure Function (Run command palette "Teams: Provision" and "Teams: Deploy") first before running this App`;
-//       }
-//     } else {
-//       funcErrorMsg = err.message;
-//       if (err.response?.data?.error) {
-//         funcErrorMsg += ": " + err.response.data.error;
-//       }
-//     }
-//     throw new Error(funcErrorMsg);
-//   }
-// };
-
-// const CallPlayPasuseApi = async (teamsUserCredential, obj) => {
-//   if (!teamsUserCredential) {
-//     throw new Error("TeamsFx SDK is not initialized.");
-//   }
-//   try {
-//     const apiBaseUrl = config.apiEndpoint + "/api/";
-//     // createApiClient(...) creates an Axios instance which uses BearerTokenAuthProvider to inject token to request header
-//     const apiClient = createApiClient(
-//       apiBaseUrl,
-//       new BearerTokenAuthProvider(
-//         async () => (await teamsUserCredential.getToken("")).token
-//       )
-//     );
-//     const response = await apiClient.post("playPause", obj);
-//     return response.data;
-//   } catch (err) {
-//     let funcErrorMsg = "";
-//     if (err?.response?.status === 404) {
-//       funcErrorMsg = `There may be a problem with the deployment of Azure Function App, please deploy Azure Function (Run command palette "Teams: Deploy") first before running this App`;
-//     } else if (err.message === "Network Error") {
-//       funcErrorMsg =
-//         "Cannot call Azure Function due to network error, please check your network connection status and ";
-//       if (err.config.url.indexOf("localhost") >= 0) {
-//         funcErrorMsg += `make sure to start Azure Function locally (Run "npm run start" command inside api folder from terminal) first before running this App`;
-//       } else {
-//         funcErrorMsg += `make sure to provision and deploy Azure Function (Run command palette "Teams: Provision" and "Teams: Deploy") first before running this App`;
-//       }
-//     } else {
-//       funcErrorMsg = err.message;
-//       if (err.response?.data?.error) {
-//         funcErrorMsg += ": " + err.response.data.error;
-//       }
-//     }
-//     throw new Error(funcErrorMsg);
-//   }
-// };
-// const CallNotifiyApi = async (teamsUserCredential, sendActivity) => {
-
-//   if (!teamsUserCredential) {
-//     throw new Error("TeamsFx SDK is not initialized.");
-//   }
-//   try {
-//     const apiBaseUrl = config.apiEndpoint + "/api/";
-//     // createApiClient(...) creates an Axios instance which uses BearerTokenAuthProvider to inject token to request header
-//     const apiClient = createApiClient(
-//       apiBaseUrl,
-//       new BearerTokenAuthProvider(
-//         async () => (await teamsUserCredential.getToken("")).token
-//       )
-//     );
-//     const response = await apiClient
-//       .post("GetNotifictaion", sendActivity)
-//     return response.data;
-//   } catch (err) {
-//     let funcErrorMsg = "";
-//     if (err?.response?.status === 404) {
-//       funcErrorMsg = `There may be a problem with the deployment of Azure Function App, please deploy Azure Function (Run command palette "Teams: Deploy") first before running this App`;
-//     } else if (err.message === "Network Error") {
-//       funcErrorMsg =
-//         "Cannot call Azure Function due to network error, please check your network connection status and ";
-//       if (err.config.url.indexOf("localhost") >= 0) {
-//         funcErrorMsg += `make sure to start Azure Function locally (Run "npm run start" command inside api folder from terminal) first before running this App`;
-//       } else {
-//         funcErrorMsg += `make sure to provision and deploy Azure Function (Run command palette "Teams: Provision" and "Teams: Deploy") first before running this App`;
-//       }
-//     } else {
-//       funcErrorMsg = err.message;
-//       if (err.response?.data?.error) {
-//         funcErrorMsg += ": " + err.response.data.error;
-//       }
-//     }
-//     throw new Error(funcErrorMsg);
-//   }
-// };
-// const CallGetSiteApi = async (teamsUserCredential, sendActivity) => {
-//   if (!teamsUserCredential) {
-//     throw new Error("TeamsFx SDK is not initialized.");
-//   }
-//   try {
-//     const apiBaseUrl = config.apiEndpoint + "/api/";
-//     // createApiClient(...) creates an Axios instance which uses BearerTokenAuthProvider to inject token to request header
-//     const apiClient = createApiClient(
-//       apiBaseUrl,
-//       new BearerTokenAuthProvider(
-//         async () => (await teamsUserCredential.getToken("")).token
-//       )
-//     );
-//     const response = await apiClient.post("GetSiteList", sendActivity);
-   
-//     return response.data;
-//   } catch (err) {
-//     let funcErrorMsg = "";
-//     if (err?.response?.status === 404) {
-//       funcErrorMsg = `There may be a problem with the deployment of Azure Function App, please deploy Azure Function (Run command palette "Teams: Deploy") first before running this App`;
-//     } else if (err.message === "Network Error") {
-//       funcErrorMsg =
-//         "Cannot call Azure Function due to network error, please check your network connection status and ";
-//       if (err.config.url.indexOf("localhost") >= 0) {
-//         funcErrorMsg += `make sure to start Azure Function locally (Run "npm run start" command inside api folder from terminal) first before running this App`;
-//       } else {
-//         funcErrorMsg += `make sure to provision and deploy Azure Function (Run command palette "Teams: Provision" and "Teams: Deploy") first before running this App`;
-//       }
-//     } else {
-//       funcErrorMsg = err.message;
-//       if (err.response?.data?.error) {
-//         funcErrorMsg += ": " + err.response.data.error;
-//       }
-//     }
-//     throw new Error(funcErrorMsg);
-//   }
-// };
-
 const CallApiItems = async (teamsUserCredential, obj) => {
   if (!teamsUserCredential) {
     throw new Error("TeamsFx SDK is not initialized.");
@@ -260,44 +111,6 @@ const callProfileApi = async (teamsUserCredential) => {
     throw new Error(funcErrorMsg);
   }
 };
-
-// const callRemoveApi = async (teamsUserCredential,obj) => {
-//   if (!teamsUserCredential) {
-//     throw new Error("TeamsFx SDK is not initialized.");
-//   }
-//   try {
-//     const apiBaseUrl = config.apiEndpoint + "/api/";
-//     // createApiClient(...) creates an Axios instance which uses BearerTokenAuthProvider to inject token to request header
-//     const apiClient = createApiClient(
-//       apiBaseUrl,
-//       new BearerTokenAuthProvider(
-//         async () => (await teamsUserCredential.getToken("")).token
-//       )
-//     );
-//     const response = await apiClient.post("DeleteTask",obj);
-//     return response.data;
-//   } catch (err) {
-//     let funcErrorMsg = "";
-//     if (err?.response?.status === 404) {
-//       funcErrorMsg = `There may be a problem with the deployment of Azure Function App, please deploy Azure Function (Run command palette "Teams: Deploy") first before running this App`;
-//     } else if (err.message === "Network Error") {
-//       funcErrorMsg =
-//         "Cannot call Azure Function due to network error, please check your network connection status and ";
-//       if (err.config.url.indexOf("localhost") >= 0) {
-//         funcErrorMsg += `make sure to start Azure Function locally (Run "npm run start" command inside api folder from terminal) first before running this App`;
-//       } else {
-//         funcErrorMsg += `make sure to provision and deploy Azure Function (Run command palette "Teams: Provision" and "Teams: Deploy") first before running this App`;
-//       }
-//     } else {
-//       funcErrorMsg = err.message;
-//       if (err.response?.data?.error) {
-//         funcErrorMsg += ": " + err.response.data.error;
-//       }
-//     }
-//     throw new Error(funcErrorMsg);
-//   }
-// };
-
 const Notifiy = async (teamsUserCredential, sendActivity) => {
   try {
     const functionRes = await callBackendFun(teamsUserCredential, sendActivity,"GetNotifictaion");
@@ -426,7 +239,6 @@ const callGetDataApi = async (teamsUserCredential,obj) => {
 const getListDataCall = async (teamsUserCredential,obj) => {
   try {
     const functionRes = await callGetDataApi(teamsUserCredential,obj);
-
     return functionRes;
   } catch (error) {
     if (error.message.includes("The application may not be authorized.")) {

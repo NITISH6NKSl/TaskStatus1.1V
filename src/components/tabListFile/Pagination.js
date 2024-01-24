@@ -2,7 +2,7 @@ import { Button,Dropdown,Option, Tooltip,Text } from "@fluentui/react-components
 import {ArrowNext24Regular,ArrowPrevious24Regular,IosArrowRtl24Regular,IosArrowLtr24Regular} from "@fluentui/react-icons";
 import { useState,useEffect } from "react";
 
-const NumberTaskArray=[1,2,3,4,5,6]
+const NumberTaskArray=[1,3,5,7,9,11]
 const Pagination =(props)=>{
     const [firstPage,setFirstPage]=useState()
     const [lastPage,setLastPage]=useState()
@@ -11,8 +11,7 @@ const Pagination =(props)=>{
         setLastPage((Math.ceil(props?.selectedData?.length / props?.numberOfTask)))
      
     }, [props])
-    
-    const selectPagehandler = (e, selectedpage) => {
+const selectPagehandler = (e, selectedpage) => {
         e.preventDefault();
     
         if (
@@ -24,23 +23,73 @@ const Pagination =(props)=>{
           
         }
       };
-    const handleTaskNumber=(taskNumber)=>{
+const handleTaskNumber=(taskNumber)=>{
             
             props?.setNumberOfTask(Number(taskNumber))
             props?.setPages(firstPage)
     }
-    const checkSelectedTab=()=>{
-      switch(props?.selectedTab){
-        case "OnGoing":
-          return "On Going"
-        case "UpComing":
-          return "Up Coming"
-        case "Completed":
-          return "Completed"
-        default:
-          return ""
-      }
+    // const checkSelectedTab=()=>{
+    //   switch(props?.selectedTab){
+    //     case "OnGoing":
+    //       return "On Going"
+    //     case "UpComing":
+    //       return "Up Coming"
+    //     case "Completed":
+    //       return "Completed"
+    //     default:
+    //       return ""
+    //   }
+    // }
+
+///////
+const totalPages = Math.ceil(props?.selectedData.length / props?.numberOfTask);
+
+const renderPageNumbers = () => {
+  const currentPage = props.pages;
+  const pageNumbers = [];
+  const maxPagesToShow = 5;
+
+  if (totalPages <= maxPagesToShow) {
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(
+        <span
+          className={currentPage === i ? "selectedPage" : ""}
+          onClick={(e) => selectPagehandler(e, i)}
+          key={i}
+        >
+          {i}
+        </span>
+      );
     }
+  } else {
+    const middlePage = Math.floor(maxPagesToShow / 2) + 1;
+    let startPage = currentPage - middlePage + 1;
+    let endPage = currentPage + middlePage - 1;
+
+    if (currentPage <= middlePage) {
+      startPage = 1;
+      endPage = maxPagesToShow;
+    } else if (currentPage >= totalPages - middlePage + 1) {
+      startPage = totalPages - maxPagesToShow + 1;
+      endPage = totalPages;
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(
+        <span
+          className={currentPage === i ? "selectedPage" : ""}
+          onClick={(e) => selectPagehandler(e, i)}
+          key={i}
+        >
+          {i}
+        </span>
+      );
+    }
+  }
+
+  return pageNumbers;
+};
+
 return (<>
     {props?.selectedData?.length > 0 ?  (
       <div
@@ -95,20 +144,7 @@ return (<>
          
           </div>
           <>
-            
-          {[...Array(Math.ceil(props?.selectedData.length / props?.numberOfTask))].map((_, index) => {
-            return (
-              <span 
-                className={props?.pages === index + 1 ? "selectedPage" : ""}
-                onClick={(e) => {
-                  selectPagehandler(e, index + 1);
-                }}
-                key={index}
-              >
-                {index + 1}
-              </span>
-            );
-          })}
+          {renderPageNumbers()}
           </>
         </div>
             <div style={{display:"flex",columnGap: "0.5vw"}}>
@@ -137,7 +173,7 @@ return (<>
                 </Tooltip>  
             </div>
       </div>
-    ):(<div style={{display:"flex",justifyContent:"center",height:"50%",alignItems:"center"}}>
+    ):(<div style={{display:"flex",justifyContent:"center",height:"65%",alignItems:"center"}}>
       <Text size={500} weight="semibold" >No data available</Text>
       </div>)}
 

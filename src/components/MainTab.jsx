@@ -1,6 +1,5 @@
 import { useContext, useState, useEffect } from "react";
 import { TeamsFxContext } from "./Context";
-import config from "./sample/lib/config";
 import AddTask from "./AddTask";
 import { GetSite } from "./util";
 import { app } from "@microsoft/teams-js";
@@ -19,20 +18,14 @@ import {
   Persona,
   CardPreview,
   Badge,
-  Dialog,
-  DialogBody,
-  DialogContent,
-  DialogActions,
-  DialogTrigger,
-  Button,
 } from "@fluentui/react-components";
+import React from "react";
 import { SearchBox } from "@fluentui/react-search-preview";
 import OnGoing from "./tabListFile/OnGoing";
 import UpComing from "./tabListFile/Upcoming";
 import Completed from "./tabListFile/Completed";
-import { BearerTokenAuthProvider, createApiClient } from "@microsoft/teamsfx";
 import { useData } from "@microsoft/teamsfx-react";
-import { getprofile } from "./util";
+import { getprofile ,getListDataCall} from "./util";
 
 const useStyles = makeStyles({
   root: {
@@ -47,45 +40,6 @@ const useStyles = makeStyles({
     color: "white",
   },
 });
-
-const functionName = "getData";
-async function callFunction(teamsUserCredential, obj) {
-  if (!teamsUserCredential) {
-    throw new Error("TeamsFx SDK is not initialized.");
-  }
-  try {
-    const apiBaseUrl = config.apiEndpoint + "/api/";
-    // createApiClient(...) creates an Axios instance which uses BearerTokenAuthProvider to inject token to request header
-    const apiClient = createApiClient(
-      apiBaseUrl,
-      new BearerTokenAuthProvider(
-        async () => (await teamsUserCredential.getToken("")).token
-      )
-    );
-    const response = await apiClient.post(functionName, obj);
-    return response.data;
-  } catch (err) {
-    let funcErrorMsg = "";
-    if (err?.response?.status === 404) {
-      funcErrorMsg = `There may be a problem with the deployment of Azure Function App, please deploy Azure Function (Run command palette "Teams: Deploy") first before running this App`;
-    } else if (err.message === "Network Error") {
-      funcErrorMsg =
-        "Cannot call Azure Function due to network error, please check your network connection status and ";
-      if (err.config.url.indexOf("localhost") >= 0) {
-        funcErrorMsg += `make sure to start Azure Function locally (Run "npm run start" command inside api folder from terminal) first before running this App`;
-      } else {
-        funcErrorMsg += `make sure to provision and deploy Azure Function (Run command palette "Teams: Provision" and "Teams: Deploy") first before running this App`;
-      }
-    } else {
-      funcErrorMsg = err.message;
-      if (err.response?.data?.error) {
-        funcErrorMsg += ": " + err.response.data.error;
-      }
-    }
-    throw new Error(funcErrorMsg);
-  }
-}
-
 export default function Tab1(props) {
   const { theme, themeString, teamsUserCredential } =
     useContext(TeamsFxContext);
@@ -106,7 +60,7 @@ export default function Tab1(props) {
   const [finalData, setFinalData] = useState([]);
   const [presence, setPresence] = useState("");
   const [addPermission, setAddPermissions] = useState(true);
-  // const [popUpDialog, setPopUpDialog] = useState(false);
+  const[dialogVisbility,setDialogVisibility]=useState(false)
   const [countTask, setCounttask] = useState({
     CountOnGoing: 0,
     CountUpcoming: 0,
@@ -140,7 +94,7 @@ export default function Tab1(props) {
           const userDispayName = await teamsUserCredential?.getUserInfo();
           const loginInfo = context.user;
           setUserName(userDispayName?.displayName);
-          const tanentUrl = context.sharePointSite.teamSiteDomain;
+          // const tanentUrl = context.sharePointSite.teamSiteDomain;
           setLoginUser(context.user);
           if (localStorage.getItem("getSiteList")) {
             siteList = JSON.parse(localStorage.getItem("getSiteList"));
@@ -155,8 +109,6 @@ export default function Tab1(props) {
               tanentUrl: context.sharePointSite.teamSiteDomain,
             };
             const res = await GetSite(teamsUserCredential, obj);
-            console.log("This is the response of get site", res);
-
             const siteObj = {
               graphSiteid: res?.graphClientMessage,
               graphListToDoId: res?.listIdToDo,
@@ -185,22 +137,16 @@ export default function Tab1(props) {
                   .graphListToDoId,
                 listid2: JSON.parse(localStorage.getItem("getSiteList"))
                   .graphListToTaskEntryId,
+                userKey:"userProfile"
               };
-              const functionRes = await callFunction(teamsUserCredential, obj);
-              console.log("This is a function response////", functionRes);
+              const functionRes = await getListDataCall(teamsUserCredential, obj);
               if (functionRes.NoUser === "No User Permissions") {
-                console.log(
-                  "this is a condition for user having no permission to tannet"
-                );
                 setCheckData(false);
                 setAddPermissions(false);
               } else if (
                 functionRes.userInfo &&
                 functionRes.graphClientMessage
               ) {
-                console.log(
-                  "This is else if condition for user present in tannent"
-                );
                 setListData([]);
                 setCounttask({
                   CountOnGoing: 0,
@@ -217,7 +163,7 @@ export default function Tab1(props) {
                       new Date(a.lastModifiedDateTime)
                     );
                   })
-                  .map((val) => {
+                  .forEach((val) => {
                     if (
                       val.createdBy.user?.email ===
                         loginInfo?.userPrincipalName ||
@@ -266,17 +212,15 @@ export default function Tab1(props) {
     setSelectedValue(data.value);
   };
   const setSearch = (e) => {
+    e.preventDefault();
     let newArry = listData.filter((item) => {
-      // let ff = item?.fields?.Title?.toLowerCase().includes(e.target.value.toLowerCase());
-      // let gg = item.createdBy?.user.displayName?.toLowerCase().includes(e.target.value.toLowerCase())
-
       return (
         item?.fields?.Title?.toLowerCase().includes(
-          e.target.value.toLowerCase()
+          e.target.value.toLowerCase().trim()
         ) ||
         item.createdBy?.user.displayName
           ?.toLowerCase()
-          .includes(e.target.value.toLowerCase())
+          .includes(e.target.value.toLowerCase().trim())
       );
     });
     if (newArry.length > 0) {
@@ -285,6 +229,7 @@ export default function Tab1(props) {
     } else {
       setFinalData([]);
     }
+  
   };
   const handleLatestTask = (value) => {
     setLatestTaskData([]);
@@ -304,10 +249,6 @@ export default function Tab1(props) {
     reload();
     setCallReload(false);
   }
-  // const onCloseFunction = () => {
-  //   setPopUpDialog(false);
-  //   props?.setCallReload(true);
-  // };
   return (
     <TeamsFxContext.Provider
       value={{
@@ -333,10 +274,10 @@ export default function Tab1(props) {
         }
       >
         <div>
-          <Card className="CardProfile">
+          <Card className="CardProfile" style={{paddingLeft:"6px"}}>
             <div
               className="Main"
-              style={{ display: "flex", justifyContent: "space-between" }}
+              style={{ display: "flex", justifyContent: "space-between"}}
             >
               <CardHeader
                 // image={
@@ -356,8 +297,8 @@ export default function Tab1(props) {
                         "aria-hidden": true,
                       }}
                       primaryText={
-                        <Text className={styles.textColor} size={600}>
-                          {userName}
+                        <Text >
+                          <span className="profileName">{userName}</span>
                         </Text>
                       }
                       name={userName}
@@ -372,7 +313,7 @@ export default function Tab1(props) {
                 }
               />
 
-              {!checkData ? (
+              
                 <CardPreview>
                   <div
                     className="headerTask"
@@ -384,47 +325,20 @@ export default function Tab1(props) {
                       justifyContent: "center",
                       rowGap: "0.5vw",
                     }}
-                  >
+                  >{!checkData&&(<>
                     <Text className={styles.textColor} size={300}>
                       Total task-{" "}
                       {countTask.CountOnGoing + countTask.CountUpcoming}
                     </Text>
-                    {/* <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        
-                      }}
-                    >
-                      <div> */}
-                    {/* <div>
-                          <Text className={styles.textColor}>
-                            {countTask.CountOnGoing}
-                          </Text>
-                        </div> */}
                     <Text className={styles.textColor} size={300}>
                       Inprogress task- {countTask.CountOnGoing}
                     </Text>
-                    {/* </div>
-
-                      <div> */}
-                    {/* <div>
-                          <Text className={styles.textColor}>
-                            {countTask.CountUpcoming}
-                          </Text>
-                        </div> */}
                     <Text className={styles.textColor} size={300} style={{}}>
                       Upcoming task- {countTask.CountUpcoming}
                     </Text>
-                    {/* </div>
-                    </div> */}
+                  </>)}
                   </div>
                 </CardPreview>
-              ) : (
-                <Spinner />
-              )}
-              {}
-              {!checkData ? (
                 <>
                   {upComingData.length > 0 ? (
                     <div className="upComingHeadCard">
@@ -440,10 +354,7 @@ export default function Tab1(props) {
                             );
                           }).slice(0,4)
                           .map((value, index) => {
-                            console.log("This is a end date")
                             const Enddate = new Date(value?.fields.EndDate);
-                            console.log("This is a full date",Enddate)
-                            console.log("This is a end date month",Enddate.getMonth()+1)
                             const DisplayEndDate = `${Enddate.getDate()}/${Enddate.getMonth()+1}/${Enddate.getFullYear()}`;
                             return (
                               <div
@@ -458,6 +369,9 @@ export default function Tab1(props) {
                                   style={{
                                     background: "transparent",
                                     cursor: "pointer",
+                                    paddingTop:'4px',
+                                    padding:'6px',
+                                    minHeight:"-moz-fit-content"
                                   }}
                                   onClick={(e) => {
                                     handleLatestTask(value);
@@ -467,8 +381,11 @@ export default function Tab1(props) {
                                     header={
                                       <diV style={{paddingBottom:"5px"}}>
                                       <Text
+                                      truncate
+                                      wrap={false}
                                         className={styles.textColor}
                                         size={300}
+                                        style={{display:"block"}}
                                       >
                                         {value.fields.Title}
                                       </Text>
@@ -479,15 +396,16 @@ export default function Tab1(props) {
                                     <div>
                                       <div
                                         className="upComingBody"
-                                        style={{ display: "flex" }}
+                                        style={{ display: "flex", }}
                                       >
                                         <Badge
                                           size="extra-large"
                                           shape="rounded"
                                           color="informative"
                                           appearance="outline"
+                                          style={{minHeight:"3vw"}}
                                         >
-                                          <div>
+                                          <div >
                                             <div
                                               className="dateBadge"
                                               style={{ height: "50%" }}
@@ -502,10 +420,10 @@ export default function Tab1(props) {
                                                 ).getDate()}
                                               </Text>
                                             </div>
-                                            <div className="monthBadges">
+                                            <div className="monthBadges" style={{width:"50%"}}>
                                               <Text
                                                 className={styles.textColor}
-                                                size={25}
+                                                size={30}
                                               >
                                                 {new Date(
                                                   value.fields.StartDate
@@ -518,19 +436,21 @@ export default function Tab1(props) {
                                         </Badge>
                                         <div style={{ paddingLeft: "5px" }}>
                                           <Text
+                          
                                             className={styles.textColor}
-                                            size={100}
+                                            size={200}
                                           >
                                             End date : {DisplayEndDate}
                                           </Text>
                                           <br />
                                           <Text
+                            
                                             className={styles.textColor}
-                                            size={100}
+                                            size={200}
                                           >
                                             {" "}
-                                            For{" "}
-                                            {value.fields.ReviewerDipalyName}
+                                            Reviewer:{" "}
+                                             {value.fields.ReviewerDipalyName}
                                           </Text>
                                         </div>
                                       </div>
@@ -544,13 +464,10 @@ export default function Tab1(props) {
                     </div>
                   ) : (
                     <div>
-                      {/* <Text className={styles.textColor}>Upcoming Task</Text> */}
+                      
                     </div>
                   )}
                 </>
-              ) : (
-                <Spinner />
-              )}
             </div>
           </Card>
         </div>
@@ -591,6 +508,7 @@ export default function Tab1(props) {
                     onChange={(e) => {
                       setSearch(e);
                     }}
+                    
                   />
                 </div>
                 <div
@@ -602,17 +520,20 @@ export default function Tab1(props) {
                 >
                   {addPermission && (
                     <AddTask
+                      setSelectedValue={setSelectedValue}
                       setCallReload={setCallReload}
                       userName={userName}
+                      listData={listData}
                     />
+               
                   )}
+                  
                 </div>
               </div>
             </div>
             <TabList
               selectedValue={selectedValue}
               onTabSelect={onTabSelect}
-              // onClick={() => setCallReload(true)}
               size="large"
             >
               <Tab value="OnGoing">Ongoing</Tab>
@@ -624,7 +545,9 @@ export default function Tab1(props) {
               {selectedValue === "OnGoing" && (
                 <div>
                   <OnGoing
+                   SearchData={finalData}
                     setCallReload={setCallReload}
+                    setDialogVisibility={setDialogVisibility}
                     listData={finalData.length > 0 ? finalData : listData}
                   />
                 </div>
@@ -632,7 +555,6 @@ export default function Tab1(props) {
               {selectedValue === "UpComing" && (
                 <div>
                   <UpComing
-                    setCallReload={setCallReload}
                     listData={finalData.length > 0 ? finalData : listData}
                   />
                 </div>
@@ -651,8 +573,35 @@ export default function Tab1(props) {
                 </div>
               )}
             </div>
+            {/* <Dialog  className="dialogPopup" open={dialogVisbility}
+             modalProps={{
+              isBlocking: false,
+              styles: { main: { marginLeft: 'auto', marginRight: 0, marginTop: 20 } },
+            }}
+            
+            >
+              <DialogSurface>
+                  <DialogBody>
+                      <DialogContent style={{paddingTop:"20px",border:"GrayText"}}>
+                        <div  className="taskCompletedDialog"> <div><CheckmarkCircle32Regular style={{color:"green"}}/></div>
+                        <Text size={500}> Task Completed</Text>
+                        </div>
+                      </DialogContent>
+                      <DialogActions style={{paddingRight:"25px"}}>
+                        
+                        <DialogTrigger >
+                          <Button onClick={()=>{setDialogVisibility(false)}}>Ok</Button>
+                        </DialogTrigger>
+                      </DialogActions>
+                  </DialogBody> 
+              </DialogSurface>    
+            </Dialog> */}
+            {/* {dialogVisbility&&(<Toast>
+        <ToastTitle>Task Completed</ToastTitle>
+      </Toast>)} */}
           </>
         )}
+        
       </div>
     </TeamsFxContext.Provider>
   );
